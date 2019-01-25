@@ -31,7 +31,6 @@ def MSE(W, b, x, y, reg):
     return total_loss
 
 def gradMSE(W, b, x, y, reg):
-    # Your implementation here
     pass
 
 def crossEntropyLoss(W, b, x, y, reg):
