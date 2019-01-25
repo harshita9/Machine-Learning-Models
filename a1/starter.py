@@ -23,7 +23,7 @@ def loadData():
 
 def MSE(W, b, x, y, reg):
     total_loss = 0
-    N = 784
+    N = len(y);
     for i in range(1, N + 1):
         MSEloss = (1 / (2 * N)) * np.linalg.norm((W.T * x[i] + b + y[i])) ** 2
         weight_decay_loss = (reg / 2) * np.linalg.norm(W) ** 2
