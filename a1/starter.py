@@ -28,12 +28,11 @@ def MSE(W, b, x, y, reg):
 	yhat=np.dot(np.transpose(W),x[i])
 	MSEloss = yhat-y.flatten()+ b #need to figure out how to do this
 	MSEloss=MSEloss **2
-	MSE.loss.sum
-	
-	
+	loss=np.sum(abs(MSEloss))
+		
 
-	weight_decay_loss = (reg / 2) * np.linalg.norm(np.dot(W,W)) ** 2 #sum the array
-	 total_loss = (MSEloss / (2 * N) + weight_decay_loss
+	weight_decay_loss = (reg / 2) * np.sum(np.linalg.norm(np.dot(W,W)) ** 2) #sum the array
+	 total_loss = (loss / (2 * N) + weight_decay_loss
 
     for i in range(0, N):
 	
