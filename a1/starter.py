@@ -25,7 +25,7 @@ def MSE(W, b, x, y, reg):
     total_loss = 0
     MSEloss=0
     N = len(y[0]);
-	yhat=np.dot(np.transpose(W),x[i])
+	yhat=np.dot(np.transpose(W),x)
 	MSEloss = yhat-y.flatten()+ b #need to figure out how to do this
 	MSEloss=MSEloss **2
 	loss=np.sum(abs(MSEloss))
