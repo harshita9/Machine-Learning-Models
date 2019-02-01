@@ -44,14 +44,14 @@ def gradMSE(W, b, x, y, reg):
 
     N = len(x)
     yhat = np.dot(np.transpose(W), x)
-    grad_MSE = (yhat.flatten() - y.flatten() + b) #need to figure out how to do this
-    gradMSE_weight = np.linalg.norm(np.dot(grad_MSE, x.flatten() * 2))
+    grad_MSE = (yhat.flatten() - y.flatten() + b)
+    gradMSE_weight = np.dot(grad_MSE, x * 2)
 
-    grad_weight_decay_loss = reg * np.linalg.norm(W)
-    gradMSE_weight = (loss / (2 * N)) + weight_decay_loss
+    grad_weight_decay_loss = reg * W
+    gradMSE_weight = (np.transpose(gradMSE_weight / (2 * N))) + grad_weight_decay_loss
 
-    gradMSE_bias = np.linalg.norm(grad_MSE * 2)
-    gradMSE_bias = np.sum(gradMSE_bias) / (2 * N)
+    gradMSE_bias = (grad_MSE * 2)
+    gradMSE_bias = np.sum(gradMSE_bias / (2 * N))
 
     return gradMSE_weight, gradMSE_bias
 
@@ -87,3 +87,4 @@ y=np.array([[3],[4],[5]])
 b=np.array([[1]])
 reg=3
 print(MSE(W,b,x,y,reg))
+print(gradMSE(W,b,x,y,reg))
