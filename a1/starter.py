@@ -22,14 +22,28 @@ def loadData():
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
 def MSE(W, b, x, y, reg):
-    # no loops (vectorized code)
     total_loss = 0
-    N = len(y)
-    print(N)
-    for i in range(1, N + 1):
-        MSEloss = (1 / (2 * N)) * np.linalg.norm((W.T * x[i] + b + y[i])) ** 2
-        weight_decay_loss = (reg / 2) * np.linalg.norm(W) ** 2
-        total_loss += MSEloss + weight_decay_loss
+    MSEloss=0
+    N = len(y[0]);
+	yhat=np.dot(np.transpose(W),x)
+	MSEloss = yhat-y.flatten()+ b #need to figure out how to do this
+	MSEloss=MSEloss **2
+	loss=np.sum(abs(MSEloss))
+
+
+	weight_decay_loss = (reg / 2) * np.sum(np.linalg.norm(np.dot(W,W)) ** 2) #sum the array
+	 total_loss = (loss / (2 * N) + weight_decay_loss
+
+    for i in range(0, N):
+
+	MSEloss += np.linalg.norm(yhat-y[i] +b))**2
+        #MSEloss = (1 / (2 * N)) * np.linalg.norm((W.T * x[i] + b + y[i])) ** 2
+
+
+    total_loss = (MSEloss / (2 * N) + weight_decay_loss
+
+
+
     return total_loss
 
 
