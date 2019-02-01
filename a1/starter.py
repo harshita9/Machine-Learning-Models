@@ -47,9 +47,8 @@ def gradMSE(W, b, x, y, reg):
     yhat = np.dot(np.transpose(W), x)
     grad_MSE = (yhat.flatten() - y.flatten() + b) #need to figure out how to do this
     gradMSE_weight = np.linalg.norm(np.dot(grad_MSE, x.flatten() * 2))
-    gradMSE_weight = np.sum(gradMSE_weight)
 
-    grad_weight_decay_loss = reg * np.sum(np.linalg.norm(W))
+    grad_weight_decay_loss = reg * np.linalg.norm(W)
     gradMSE_weight = (loss / (2 * N)) + weight_decay_loss
 
     gradMSE_bias = np.linalg.norm(grad_MSE * 2)
@@ -76,7 +75,6 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 #if __name__ == "__main__":
 def main():
-    print("hi")
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     x, y = trainData, trainTarget
     W = np.zeros(x.shape)
