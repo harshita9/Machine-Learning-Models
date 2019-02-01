@@ -22,6 +22,7 @@ def loadData():
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
 def MSE(W, b, x, y, reg):
+
     total_loss = 0
 
     N = len(x)
@@ -36,13 +37,23 @@ def MSE(W, b, x, y, reg):
 
 
 
+
 def gradMSE(W, b, x, y, reg):
-    bias_gradient=0
-    weight_gradient=0
+    gradMSE_weight = 0
+    gradMSE_bias = 0
 
-    return bias_gradient, weight_gradient
+    N = len(x)
+    yhat = np.dot(np.transpose(W), x)
+    grad_MSE = (yhat.flatten() - y.flatten() + b) #need to figure out how to do this
+    gradMSE_weight = np.linalg.norm(np.dot(grad_MSE, x.flatten() * 2))
 
+    grad_weight_decay_loss = reg * np.linalg.norm(W)
+    gradMSE_weight = (loss / (2 * N)) + weight_decay_loss
 
+    gradMSE_bias = np.linalg.norm(grad_MSE * 2)
+    gradMSE_bias = np.sum(gradMSE_bias) / (2 * N)
+
+    return gradMSE_weight, gradMSE_bias
 
 
 def crossEntropyLoss(W, b, x, y, reg):
@@ -63,11 +74,10 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 #if __name__ == "__main__":
 def main():
-    print("hi")
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     x, y = trainData, trainTarget
     W = np.zeros(x.shape)
-    print("hi")
+    print(len(x))
 
 main()
 
