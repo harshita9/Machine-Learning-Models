@@ -26,20 +26,24 @@ def MSE(W, b, x, y, reg):
 
     N = len(x)
     yhat=np.dot(np.transpose(W),x)
-    MSEloss = yhat-y.flatten()+ b #need to figure out how to do this
-    MSEloss=MSEloss **2
-    loss=np.sum(abs(MSEloss))
+    MSEloss = yhat.flatten()-y.flatten()+ b
+    MSEloss=np.linalg.norm(MSEloss) **2
 
-
-    weight_decay_loss = (reg / 2) * np.sum(np.linalg.norm(np.dot(W,W)) ** 2)
-    total_loss = (loss / (2 * N)) + weight_decay_loss
+    weight_decay_loss = (reg / 2) * (np.linalg.norm(W) ** 2)
+    total_loss = (MSEloss / (2 * N)) + weight_decay_loss
     return total_loss
 
 
 
 
 def gradMSE(W, b, x, y, reg):
-    pass
+    bias_gradient=0
+    weight_gradient=0
+
+    return bias_gradient, weight_gradient
+
+
+
 
 def crossEntropyLoss(W, b, x, y, reg):
     # Your implementation here
@@ -66,3 +70,10 @@ def main():
     print("hi")
 
 main()
+
+W=np.array([[1],[2],[3]])
+x=np.array([[3,4,3],[1,2,2],[3,4,1]])
+y=np.array([[3],[4],[5]])
+b=np.array([[1]])
+reg=3
+print(MSE(W,b,x,y,reg))
