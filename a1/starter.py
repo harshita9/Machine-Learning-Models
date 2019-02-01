@@ -57,8 +57,9 @@ def gradMSE(W, b, x, y, reg):
 
 
 def crossEntropyLoss(W, b, x, y, reg):
-    # Your implementation here
+    #
     pass
+
 
 def gradCE(W, b, x, y, reg):
     # Your implementation here
@@ -66,14 +67,18 @@ def gradCE(W, b, x, y, reg):
 
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS):
     # Your implementation here
-    while previous_step_size > precision and iters < max_iters:
-    prev_x = cur_x #Store current x value in prev_x
-    cur_x = cur_x - rate * df(prev_x) #Grad descent
-    previous_step_size = abs(cur_x - prev_x) #Change in x
-    iters = iters+1 #iteration count
-    print("Iteration",iters,"\nX value is",cur_x) #Print iterations
-
+    W=np.zeros(784)
+    i=0
+    while previous_step_size > precision and i < iterations:
+    prev_x = cur_x #Store current x value in prev_x
+    cur_x = cur_x - rate * df(prev_x) #Grad descent
+    previous_step_size = abs(cur_x - prev_x) #Change in x
+    iters = iters+1 #iteration count
+    print("Iteration",iters,"\nX value is",cur_x) #Print iterations
+    
     print("The local minimum occurs at", cur_x)
+
+return weight
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     # Your implementation here
