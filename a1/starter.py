@@ -23,17 +23,18 @@ def loadData():
 
 def MSE(W, b, x, y, reg):
     total_loss = 0
-    
+
     N = len(x)
     yhat=np.dot(np.transpose(W),x)
     MSEloss = yhat-y.flatten()+ b #need to figure out how to do this
     MSEloss=MSEloss **2
     loss=np.sum(abs(MSEloss))
-		
+
 
     weight_decay_loss = (reg / 2) * np.sum(np.linalg.norm(np.dot(W,W)) ** 2)
     total_loss = (loss / (2 * N)) + weight_decay_loss
     return total_loss
+
 
 
 
@@ -58,10 +59,10 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 #if __name__ == "__main__":
 def main():
+    print("hi")
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     x, y = trainData, trainTarget
     W = np.zeros(x.shape)
-
-    print(W.shape)
+    print("hi")
 
 main()
