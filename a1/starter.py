@@ -22,13 +22,16 @@ def loadData():
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
 def MSE(W, b, x, y, reg):
+    # no loops (vectorized code)
     total_loss = 0
-    N = len(y);
+    N = len(y)
+    print(N)
     for i in range(1, N + 1):
         MSEloss = (1 / (2 * N)) * np.linalg.norm((W.T * x[i] + b + y[i])) ** 2
         weight_decay_loss = (reg / 2) * np.linalg.norm(W) ** 2
         total_loss += MSEloss + weight_decay_loss
     return total_loss
+
 
 def gradMSE(W, b, x, y, reg):
     pass
@@ -51,9 +54,10 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 #if __name__ == "__main__":
 def main():
+    print("hi")
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     x, y = trainData, trainTarget
     W = np.zeros(x.shape)
-    print(W.shape)
+    print("hi")
 
 main()
