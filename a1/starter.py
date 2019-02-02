@@ -55,10 +55,23 @@ def gradMSE(W, b, x, y, reg):
 
     return gradMSE_weight, gradMSE_bias
 
+def sigmoidFunction(z):
+    yhat = 1 / (1 + exp)
+
+
 
 def crossEntropyLoss(W, b, x, y, reg):
-    #
-    pass
+    cross_entropy_loss = 0
+    N = len(x)
+
+    yhat=np.dot(np.transpose(W),x)
+    MSEloss = yhat.flatten()-y.flatten()+ b
+    MSEloss=np.linalg.norm(MSEloss) **2
+
+    weight_decay_loss = (reg / 2) * (np.linalg.norm(W) ** 2)
+    total_loss = (MSEloss / N) + weight_decay_loss
+
+    return cross_entropy_loss
 
 
 def gradCE(W, b, x, y, reg):
@@ -83,6 +96,7 @@ def main():
     print (x.shape)
     print (x_shape1, x_shape2)
     x.reshape(x_shape1, x_shape2)
+    np.append()
     print (W.shape)
     print (x.shape)
 
