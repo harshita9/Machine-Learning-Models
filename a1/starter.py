@@ -142,7 +142,6 @@ def main():
     alpha = 0.005
 
     W, b = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
-    plt.scatter(loss, e)
     W, b = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS)
     W, b = grad_descent(W, b, testData, testTarget, alpha, iterations, reg, EPS)
 
