@@ -136,12 +136,6 @@ def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     y =  trainTarget
 
-    W = np.zeros(trainData.shape[1] * trainData.shape[2])
-    x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
-
-    print (W.shape)
-    print (x.shape)
-    print (y.shape)
 
 main()
 '''
