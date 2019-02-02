@@ -55,16 +55,13 @@ def gradMSE(W, b, x, y, reg):
 
     return gradMSE_weight, gradMSE_bias
 
-def sigmoidFunction(z):
-    yhat = 1 / (1 + exp)
-
-
 
 def crossEntropyLoss(W, b, x, y, reg):
     cross_entropy_loss = 0
     N = len(x)
 
-    yhat=np.dot(np.transpose(W),x)
+    yhat = np.dot(np.transpose(W), x).flatten() + b
+
     MSEloss = yhat.flatten()-y.flatten()+ b
     MSEloss=np.linalg.norm(MSEloss) **2
 
@@ -134,8 +131,27 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 #if __name__ == "__main__":
 def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
-    y =  trainTarget
 
+<<<<<<< HEAD
+=======
+    W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
+    b = np.zeros(1,1)
+
+    iterations = 5000
+    reg = 0
+    EPS = 1 * 10 ** (-7)
+
+    alpha = 0.005
+
+    W, b = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
+    plt.scatter(loss, e)
+    W, b = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS)
+    W, b = grad_descent(W, b, testData, testTarget, alpha, iterations, reg, EPS)
+
+    print (W.shape)
+    print (x.shape)
+    print (y.shape)
+>>>>>>> 7d3aea01f5c27c9a681e06bacb829c78085d7ebb
 
 main()
 '''
