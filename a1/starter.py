@@ -67,6 +67,7 @@ def gradCE(W, b, x, y, reg):
 
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS):
     # Your implementation here
+<<<<<<< HEAD
     '''W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
     x=trainingData()
     i=0
@@ -81,6 +82,10 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
 
     return W
+=======
+
+    pass
+>>>>>>> 8f04afa06181ee71376d7253fd1a8adbc1acc2d2
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     # Your implementation here
@@ -91,6 +96,13 @@ def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
     x, y = trainData, trainTarget
     W = np.zeros(x.shape[1] * x.shape[2])
+<<<<<<< HEAD
+=======
+    x_shape1, x_shape2 = x.shape[0], x.shape[1] * x.shape[2]
+    print (x.shape)
+    print (x_shape1, x_shape2)
+    x.reshape(x_shape1, x_shape2)
+>>>>>>> 8f04afa06181ee71376d7253fd1a8adbc1acc2d2
     print (W.shape)
     print (x.shape)
 
