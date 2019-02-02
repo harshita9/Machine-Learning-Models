@@ -26,7 +26,7 @@ def MSE(W, b, x, y, reg):
     total_loss = 0
 
     N = len(x)
-    yhat=np.dot(np.transpose(W),x)
+    yhat=np.dot(W.flatten(),x)
     MSEloss = yhat.flatten()-y.flatten()+ b
     MSEloss=np.linalg.norm(MSEloss) **2
 
@@ -43,9 +43,9 @@ def gradMSE(W, b, x, y, reg):
     gradMSE_bias = 0
 
     N = len(x)
-    yhat = np.dot(np.transpose(W), x)
+    yhat = np.dot(W.flatten(), x)
     grad_MSE = (yhat.flatten() - y.flatten() + b)
-    gradMSE_weight = np.dot(grad_MSE, x * 2)
+    gradMSE_weight = np.dot(grad_MSE, np.transpose(x) * 2)
 
     grad_weight_decay_loss = reg * W
     gradMSE_weight = (np.transpose(gradMSE_weight / (2 * N))) + grad_weight_decay_loss
@@ -78,13 +78,20 @@ def gradCE(W, b, x, y, reg):
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS):
     # Your implementation here
     W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
-    b=np.zeros(1,1)
-    x=trainData.reshape(trainData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
+    #W=np.transpose(W)
+    b=np.zeros(1)
+    x=trainingData.reshape(trainingData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
+    x=np.transpose(x)
     y=trainingLabels
     i=0
-    weight_check=true
-    bias_check=true
+    weight_check=True
+    bias_check=True
+    train_loss=[]
     for i in range(iterations):
+
+        #plot the losses
+        loss=MSE(W,b,x,y,reg)
+        train_loss.append(loss)
 
         weight_gradient, bias_gradient=gradMSE(W,b,x,y,reg)
         if (weight_check):
@@ -92,14 +99,14 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             norm_weight_grad= np.linalg.norm(weight_gradient)
             weight_direction=-1*weight_gradient /norm_weight_grad
             #Calculate the new weight vecton
-            new_w=w+alpha*weight_direction
+            new_w=W+alpha*weight_direction
             #weight error
-            difference_weight=np.linalg.norm(new_w-w)**2
+            difference_weight=np.linalg.norm(new_w-W)**2
 
             if(difference_weight<EPS):
-                weight_check=false
+                weight_check=False
             else:
-                w=new_w
+                W=new_w
 
         #Calulate optimal bias
         if(bias_check):
@@ -111,7 +118,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             differece_bias=np.linalg.norm(new_b-b)**2
 
             if(differece_bias<EPS):
-                bias_check=false
+                bias_check=False
             else:
                 b=new_b
 
@@ -122,32 +129,92 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
 
 
-    return W,b
+    return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     # Your implementation here
     pass
 
+
+def normalMSE(x,y):
+    inversexx=np.linalg.inv(np.dot(np.transpose(x),x))
+    w=np.dot(np.dot(inversexx,np.transpose(x),y))
+
+    return w
+
 #if __name__ == "__main__":
 def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
-    W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
-    b = np.zeros(1,1)
+    W = np.zeros(trainData.shape[1] * trainData.shape[2])
+
+    b = np.zeros(1)
+
 
     iterations = 5000
     reg = 0
+
+    reg1=0.001
+    reg2= 0.1
+    reg2= 0.5
     EPS = 1 * 10 ** (-7)
 
     alpha = 0.005
+    alpha1 = 0.001
+    alpha2 = 0.0001
 
+    #different alpha value
+    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
+    #W, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS)
+    #W, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS)
+
+    loss_batched=trainloss[len(trainloss)-1]
+    #different reg value
+    '''W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS)
+    W, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS)
+    W, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS)
+'''
+
+'''    plt.close('all')
+    #plt.scatter(iteration, train_target)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+
+    X_test = np.linspace(0, len(trainloss), len(trainloss))
+    X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
+    X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
+
+    plt.title('Tuning the learning_rate')'''
+'''
+    #plot with different alpha value
+    plt.plot(X_test, trainloss, label='alpha=0.05')
+    plt.plot(X_test2, trainloss2, label='alpha=0.001')
+    plt.plot(X_test3, trainloss3, label='alpha=0.0001')'''
+
+    x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
+    x=np.transpose(x)
+    y=trainingLabels
+    #calculate normal equation
+    W2=normalMSE(x,y)
+    loss=MSE(W2,x,y,0,0)
+
+    print('loss batched: ',loss_batched)
+    print('loss normal: ',loss)
+
+    #plot with different reg value
+    '''plt.plot(X_test, trainloss, label='reg=0.001')
+    plt.plot(X_test2, trainloss2, label='reg=0.1')
+    plt.plot(X_test3, trainloss3, label='alpha=0.5')'''
+
+<<<<<<< HEAD
     W, b = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
     W, b = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS)
     W, b = grad_descent(W, b, testData, testTarget, alpha, iterations, reg, EPS)
+=======
+>>>>>>> d3081257d3f3eb97a8448c042d497e3884155b3e
 
-    print (W.shape)
-    print (x.shape)
-    print (y.shape)
+    '''plt.legend()
+    plt.show()'''
 
 main()
 '''
