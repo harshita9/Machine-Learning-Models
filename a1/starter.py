@@ -67,25 +67,52 @@ def gradCE(W, b, x, y, reg):
 
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS):
     # Your implementation here
-<<<<<<< HEAD
-    '''W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
-    x=trainingData()
+    W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
+    b=np.zeros(1,1)
+    x=trainData.reshape(trainData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
+    y=trainingLabels
     i=0
-    while previous_step_size > precision and i < iterations:
-    prev_x = cur_x #Store current x value in prev_x
-    cur_x = cur_x - rate * df(prev_x) #Grad descent
-    previous_step_size = abs(cur_x - prev_x) #Change in x
-    iters = iters+1 #iteration count
-    print("Iteration",iters,"\nX value is",cur_x) #Print iterations
-    
-    print("The local minimum occurs at", cur_x)'''
+    weight_check=true
+    bias_check=true
+    for i in range(iterations):
+
+        weight_gradient, bias_gradient=gradMSE(W,b,x,y,reg)
+        if (weight_check):
+            #Calculate the direction of the gradient of weight vector
+            norm_weight_grad= np.linalg.norm(weight_gradient)
+            weight_direction=-1*weight_gradient /norm_weight_grad
+            #Calculate the new weight vecton
+            new_w=w+alpha*weight_direction
+            #weight error
+            difference_weight=np.linalg.norm(new_w-w)**2
+
+            if(difference_weight<EPS):
+                weight_check=false
+            else:
+                w=new_w
+
+        #Calulate optimal bias
+        if(bias_check):
+            norm_bias_grad=np.linalg.norm(bias_gradient)
+            bias_direction=-1*bias_gradient / norm_bias_grad
+
+            new_b=b+alpha*bias_direction
+
+            differece_bias=np.linalg.norm(new_b-b)**2
+
+            if(differece_bias<EPS):
+                bias_check=false
+            else:
+                b=new_b
 
 
-    return W
-=======
+        if (not bias_check and not weight_check):
+            break
 
-    pass
->>>>>>> 8f04afa06181ee71376d7253fd1a8adbc1acc2d2
+
+
+
+    return W,b
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     # Your implementation here
@@ -94,24 +121,21 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 #if __name__ == "__main__":
 def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
-    x, y = trainData, trainTarget
-    W = np.zeros(x.shape[1] * x.shape[2])
-<<<<<<< HEAD
-=======
-    x_shape1, x_shape2 = x.shape[0], x.shape[1] * x.shape[2]
-    print (x.shape)
-    print (x_shape1, x_shape2)
-    x.reshape(x_shape1, x_shape2)
->>>>>>> 8f04afa06181ee71376d7253fd1a8adbc1acc2d2
+    y =  trainTarget
+
+    W = np.zeros(trainData.shape[1] * trainData.shape[2])
+    x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
+
     print (W.shape)
     print (x.shape)
+    print (y.shape)
 
 main()
-
+'''
 W=np.array([[1],[2],[3]])
 x=np.array([[3,4,3],[1,2,2],[3,4,1]])
 y=np.array([[3],[4],[5]])
 b=np.array([[1]])
 reg=3
 print(MSE(W,b,x,y,reg))
-print(gradMSE(W,b,x,y,reg))
+print(gradMSE(W,b,x,y,reg))'''
