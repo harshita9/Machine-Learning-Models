@@ -97,30 +97,35 @@ def gradCE(W, b, x, y, reg):
         return gradCE_weight, gradCE_bias
 
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS, lossType):
-    # Your implementation here
+    # Initialize W the weight vector to zeros (784 x 1 array)
     W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
-    #W=np.transpose(W)
-    b=np.zeros(1)
-    x=trainingData.reshape(trainingData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
-    x=np.transpose(x)
-    y=trainingLabels
-    i=0
-    weight_check=True
-    bias_check=True
-    train_loss=[]
+    # Initialize b the bias vector to zero (1 x 1 array)
+    b = np.zeros(1)
+    # reshape x to be a 2D array (number of samples x 784)
+    x = trainingData.reshape(trainingData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
+    x = np.transpose(x)
+
+    y = trainingLabels
+
+    i = 0
+    train_loss = []
+
     for i in range(iterations):
-
-        #plot the losses
+        # get total loss based on lossType (default is MSE)
         if lossType == "MSE":
-            loss=MSE(W,b,x,y,reg)
+            loss = MSE(W,b,x,y,reg)
         elif lossType == "CE":
+<<<<<<< HEAD
             loss=crossEntropyLoss(W,b,x,y,reg)
+=======
+            loss = crossEntropyLoss(W,b,x,y,reg)
+>>>>>>> ad8d5ecc26400713b4499215554f9e40012bc3cf
         else:
-            loss=MSE(W,b,x,y,reg)
-
+            loss = MSE(W,b,x,y,reg)
+        # append loss to train_loss for plotting
         train_loss.append(loss)
 
-        #plot the losses
+        # get gradient with respect to weight and bias
         if lossType == "MSE":
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
         elif lossType == "CE":
