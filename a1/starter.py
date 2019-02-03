@@ -60,13 +60,21 @@ def crossEntropyLoss(W, b, x, y, reg):
     cross_entropy_loss = 0
     N = len(x)
 
-    yhat = np.dot(np.transpose(W), x).flatten() + b
+    z = np.dot(W.flatten(), x) + b
+    yhat=1/(1+np.exp(-1*z))
 
-    MSEloss = yhat.flatten()-y.flatten()+ b
-    MSEloss=np.linalg.norm(MSEloss) **2
+
+    ylogx=-1* np.dot(np.dot(y,np.log(yhat)),x)
+
+    secondexpression=np.dot((1-y),np.log(1-np.dot(yhat,x)))
+
+
+    crossloss=1/N * np.sum((ylogx-secondexpression))
 
     weight_decay_loss = (reg / 2) * (np.linalg.norm(W) ** 2)
-    total_loss = (MSEloss / N) + weight_decay_loss
+
+    cross_entropy_loss = crossloss + weight_decay_loss
+
 
     return cross_entropy_loss
 
@@ -147,6 +155,8 @@ def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
     W = np.zeros(trainData.shape[1] * trainData.shape[2])
+    W1 = np.zeros(trainData.shape[1] * trainData.shape[2])
+    W2 = np.zeros(trainData.shape[1] * trainData.shape[2])
 
     b = np.zeros(1)
 
@@ -156,7 +166,7 @@ def main():
 
     reg1=0.001
     reg2= 0.1
-    reg2= 0.5
+    reg3= 0.5
     EPS = 1 * 10 ** (-7)
 
     alpha = 0.005
@@ -165,57 +175,80 @@ def main():
 
     #different alpha value
     W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
-    #W, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS)
-    #W, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS)
+    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS)
+    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS)
 
-    loss_batched=trainloss[len(trainloss)-1]
+    '''loss_batched=trainloss[len(trainloss)-1]
     #different reg value
-    '''W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS)
-    W, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS)
-    W, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS)
-'''
+    W, b,trainloss4 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS)
+    W, b,trainloss5 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS)
+    W, b,trainloss6 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS)
 
-'''    plt.close('all')
+
+    plt.close('all')
     #plt.scatter(iteration, train_target)
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+
 
     X_test = np.linspace(0, len(trainloss), len(trainloss))
     X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
     X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
 
-    plt.title('Tuning the learning_rate')'''
-'''
+
+    X_test4 = np.linspace(0, len(trainloss4), len(trainloss4))
+    X_test5 = np.linspace(0, len(trainloss5), len(trainloss5))
+    X_test6 = np.linspace(0, len(trainloss6), len(trainloss6))'''
+
     #plot with different alpha value
-    plt.plot(X_test, trainloss, label='alpha=0.05')
+    '''plt.figure(1)
+    plt.axis([0,5000,0,1.2])
+    plt.plot(X_test, trainloss, label='alpha=0.005')
     plt.plot(X_test2, trainloss2, label='alpha=0.001')
     plt.plot(X_test3, trainloss3, label='alpha=0.0001')'''
 
     x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
     x=np.transpose(x)
-    y=trainingLabels
+    '''y=trainTarget
     #calculate normal equation
     W2=normalMSE(x,y)
     loss=MSE(W2,x,y,0,0)
 
     print('loss batched: ',loss_batched)
-    print('loss normal: ',loss)
+    print('loss normal: ',loss)'''
 
     #plot with different reg value
-    '''plt.plot(X_test, trainloss, label='reg=0.001')
-    plt.plot(X_test2, trainloss2, label='reg=0.1')
-    plt.plot(X_test3, trainloss3, label='alpha=0.5')'''
+    '''plt.figure(2)
+    plt.title('Generalization')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.plot(X_test4, trainloss4, label='reg=0.001')
+    plt.plot(X_test5, trainloss5, label='reg=0.1')
+    plt.plot(X_test6, trainloss6, label='reg=0.5')'''
 
 
-    '''plt.legend()
-    plt.show()'''
+    #training and validation
+    plt.figure(3)
+    ytrain=np.dot(W.flatten(),x)
+    ytrain2=np.dot(W1.flatten(),x)
+    ytrain3=np.dot(W2.flatten(),x)
+    plt.scatter(ytrain, trainTarget,label='alpha=0.005')
+    plt.scatter(ytrain2, trainTarget,label='alpha=0.001')
+    plt.scatter(ytrain3, trainTarget,label='alpha=0.0001')
+    plt.xlabel('input (x)')
+    plt.ylabel('target (t)')
+    #X_test = np.linspace(-2, 2, 100)
+    #yhat = np.dot(poly_map(X_test, poly_degree), W_opt[1:poly_degree+1]) +  W_opt[0]
+    #plt.plot(X_test, yhat, 'r')
+
+    plt.legend()
+    plt.show()
 
 main()
-'''
-W=np.array([[1],[2],[3]])
+
+'''W=np.array([[1],[2],[3]])
 x=np.array([[3,4,3],[1,2,2],[3,4,1]])
 y=np.array([[3],[4],[5]])
 b=np.array([[1]])
 reg=3
 print(MSE(W,b,x,y,reg))
-print(gradMSE(W,b,x,y,reg))'''
+print(gradMSE(W,b,x,y,reg))
+print(crossEntropyLoss(W, b, x, y, reg))'''
