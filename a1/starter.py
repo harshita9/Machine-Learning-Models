@@ -194,10 +194,10 @@ def main():
     alpha2 = 0.0001
 
     #different alpha value
-    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS, "MSE")
-    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS, "MSE")
-    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS, "MSE")
-
+    '''W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS, "MSE")
+    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS,"MSE")
+    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS,"MSE")
+'''
     '''loss_batched=trainloss[len(trainloss)-1]
     #different reg value
     W, b,trainloss4 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS)
@@ -227,13 +227,13 @@ def main():
 
     x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
     x=np.transpose(x)
-    '''y=trainTarget
+    y=trainTarget
     #calculate normal equation
     W2=normalMSE(x,y)
     loss=MSE(W2,x,y,0,0)
 
     print('loss batched: ',loss_batched)
-    print('loss normal: ',loss)'''
+    print('loss normal: ',loss)
 
     #plot with different reg value
     '''plt.figure(2)
@@ -246,7 +246,7 @@ def main():
 
 
     #training and validation
-    plt.figure(3)
+    '''plt.figure(3)
     ytrain=np.dot(W.flatten(),x)
     ytrain2=np.dot(W1.flatten(),x)
     ytrain3=np.dot(W2.flatten(),x)
@@ -254,13 +254,13 @@ def main():
     plt.scatter(ytrain2, trainTarget,label='alpha=0.001')
     plt.scatter(ytrain3, trainTarget,label='alpha=0.0001')
     plt.xlabel('input (x)')
-    plt.ylabel('target (t)')
+    plt.ylabel('target (t)')'''
     #X_test = np.linspace(-2, 2, 100)
     #yhat = np.dot(poly_map(X_test, poly_degree), W_opt[1:poly_degree+1]) +  W_opt[0]
     #plt.plot(X_test, yhat, 'r')
 
-    plt.legend()
-    plt.show()
+    '''plt.legend()
+    plt.show()'''
 
 
 main()
