@@ -34,10 +34,6 @@ def MSE(W, b, x, y, reg):
     total_loss = (MSEloss / (2 * N)) + weight_decay_loss
     return total_loss
 
-
-
-
-
 def gradMSE(W, b, x, y, reg):
     gradMSE_weight = 0
     gradMSE_bias = 0
@@ -80,10 +76,28 @@ def crossEntropyLoss(W, b, x, y, reg):
 
 
 def gradCE(W, b, x, y, reg):
-    # Your implementation here
-    pass
+        gradCE_weight, gradCE_bias = 0, 0
+        N = len(x)
 
-def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS):
+        z = np.dot(W.flatten(), x) + b
+        yhat=1/(1+np.exp(-1*z))
+
+
+        ylogx=-1* np.dot(np.dot(y,np.log(yhat)),x)
+    
+        secondexpression=np.dot((1-y),np.log(1-np.dot(yhat,x)))
+
+
+        crossloss=1/N * np.sum((ylogx-secondexpression))
+
+        weight_decay_loss = reg * W
+
+        cross_entropy_loss = crossloss + weight_decay_loss
+
+
+        return gradCE_weight, gradCE_bias
+
+def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS, lossType):
     # Your implementation here
     W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
     #W=np.transpose(W)
@@ -98,10 +112,23 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
     for i in range(iterations):
 
         #plot the losses
-        loss=MSE(W,b,x,y,reg)
+        if lossType="MSE":
+            loss=MSE(W,b,x,y,reg)
+        elif lossType="CE":
+            loss=CE(W,b,x,y,reg)
+        else:
+            loss=MSE(W,b,x,y,reg)
+
         train_loss.append(loss)
 
-        weight_gradient, bias_gradient=gradMSE(W,b,x,y,reg)
+        #plot the losses
+        if lossType="MSE":
+            weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
+        elif lossType="CE":
+            weight_gradient, bias_gradient = gradCE(W,b,x,y,reg)
+        else:
+            weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
+
         if (weight_check):
             #Calculate the direction of the gradient of weight vector
             norm_weight_grad= np.linalg.norm(weight_gradient)
@@ -134,9 +161,6 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         if (not bias_check and not weight_check):
             break
 
-
-
-
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
@@ -145,8 +169,8 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 
 def normalMSE(x,y):
-    inversexx=np.linalg.inv(np.dot(np.transpose(x),x))
-    w=np.dot(np.dot(inversexx,np.transpose(x),y))
+    inversexx = np.linalg.inv(np.dot(np.transpose(x),x))
+    w = np.dot(np.dot(inversexx,np.transpose(x),y))
 
     return w
 
