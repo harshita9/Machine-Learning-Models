@@ -97,30 +97,31 @@ def gradCE(W, b, x, y, reg):
         return gradCE_weight, gradCE_bias
 
 def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS, lossType):
-    # Your implementation here
+    # Initialize W the weight vector to zeros (784 x 1 array)
     W = np.zeros(trainingData.shape[1] * trainingData.shape[2])
-    #W=np.transpose(W)
-    b=np.zeros(1)
-    x=trainingData.reshape(trainingData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
-    x=np.transpose(x)
-    y=trainingLabels
-    i=0
-    weight_check=True
-    bias_check=True
-    train_loss=[]
+    # Initialize b the bias vector to zero (1 x 1 array)
+    b = np.zeros(1)
+    # reshape x to be a 2D array (number of samples x 784)
+    x = trainingData.reshape(trainingData.shape[0],(trainingData.shape[1]*trainingData.shape[2]))
+    x = np.transpose(x)
+
+    y = trainingLabels
+
+    i = 0
+    train_loss = []
+
     for i in range(iterations):
-
-        #plot the losses
+        # get total loss based on lossType (default is MSE)
         if lossType == "MSE":
-            loss=MSE(W,b,x,y,reg)
+            loss = MSE(W,b,x,y,reg)
         elif lossType == "CE":
-            loss=CE(W,b,x,y,reg)
+            loss = crossEntropyLoss(W,b,x,y,reg)
         else:
-            loss=MSE(W,b,x,y,reg)
-
+            loss = MSE(W,b,x,y,reg)
+        # append loss to train_loss for plotting
         train_loss.append(loss)
 
-        #plot the losses
+        # get gradient with respect to weight and bias
         if lossType == "MSE":
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
         elif lossType == "CE":
@@ -128,39 +129,6 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
 
-<<<<<<< HEAD
-        if (weight_check):
-            #Calculate the direction of the gradient of weight vector
-            norm_weight_grad= np.linalg.norm(weight_gradient)
-            weight_direction=-1*weight_gradient /norm_weight_grad
-            #Calculate the new weight vecton
-            new_w=W+alpha*weight_direction
-            #weight error
-            difference_weight=np.linalg.norm(new_w-W)**2
-
-            if(norm_weight_grad<EPS):
-                weight_check=False
-            else:
-                W=new_w
-
-        #Calulate optimal bias
-        if(bias_check):
-            norm_bias_grad=np.linalg.norm(bias_gradient)
-            bias_direction=-1*bias_gradient / norm_bias_grad
-
-            new_b=b+alpha*bias_direction
-
-            differece_bias=np.linalg.norm(new_b-b)**2
-
-            if(differece_bias<EPS):
-                bias_check=False
-            else:
-                b=new_b
-
-
-        if (not bias_check and not weight_check):
-            break
-=======
         # Calulate optimal weight an bias
 
         # Calculate the direction of the gradient of weight vector
@@ -181,7 +149,6 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             W = new_w
             b = new_b
->>>>>>> 2daa4a3cb91a1172dc789df991bb23b708f61836
 
     return W,b,train_loss
 
