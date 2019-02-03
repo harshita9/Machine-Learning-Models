@@ -114,7 +114,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         if lossType == "MSE":
             loss=MSE(W,b,x,y,reg)
         elif lossType == "CE":
-            loss=CE(W,b,x,y,reg)
+            loss=crossEntropyLoss(W,b,x,y,reg)
         else:
             loss=MSE(W,b,x,y,reg)
 
@@ -128,39 +128,6 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
 
-<<<<<<< HEAD
-        if (weight_check):
-            #Calculate the direction of the gradient of weight vector
-            norm_weight_grad= np.linalg.norm(weight_gradient)
-            weight_direction=-1*weight_gradient /norm_weight_grad
-            #Calculate the new weight vecton
-            new_w=W+alpha*weight_direction
-            #weight error
-            difference_weight=np.linalg.norm(new_w-W)**2
-
-            if(norm_weight_grad<EPS):
-                weight_check=False
-            else:
-                W=new_w
-
-        #Calulate optimal bias
-        if(bias_check):
-            norm_bias_grad=np.linalg.norm(bias_gradient)
-            bias_direction=-1*bias_gradient / norm_bias_grad
-
-            new_b=b+alpha*bias_direction
-
-            differece_bias=np.linalg.norm(new_b-b)**2
-
-            if(differece_bias<EPS):
-                bias_check=False
-            else:
-                b=new_b
-
-
-        if (not bias_check and not weight_check):
-            break
-=======
         # Calulate optimal weight an bias
 
         # Calculate the direction of the gradient of weight vector
@@ -173,15 +140,14 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         new_w = W + alpha * weight_direction
         new_b = b + alpha * bias_direction
         # weight error
-        difference = np.linalg.norm(new_w - W) ** 2
+        #difference = np.linalg.norm(new_w - W) ** 2
         # checking if new_w (new weight) is minimum
-        if(difference < EPS):
+        if(norm_weight_grad < EPS):
             # minimum/final weight array found
             break
         else:
             W = new_w
             b = new_b
->>>>>>> 2daa4a3cb91a1172dc789df991bb23b708f61836
 
     return W,b,train_loss
 
@@ -226,59 +192,68 @@ def main():
     alpha2 = 0.0001
 
     #different alpha value
-    '''W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS, "MSE")
-    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS,"MSE")
-    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS,"MSE")
-'''
-    '''loss_batched=trainloss[len(trainloss)-1]
-    #different reg value
-    W, b,trainloss4 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS)
-    W, b,trainloss5 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS)
-    W, b,trainloss6 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS)
+    W, b,trainloss = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS, "MSE")
+    W1, b,trainloss2 = grad_descent(W, b, validData, validTarget, alpha1, iterations, reg, EPS,"MSE")
+    W2, b,trainloss3 = grad_descent(W, b, validData, validTarget, alpha2, iterations, reg, EPS,"MSE")
+
+    #loss_batched=trainloss[len(trainloss)-1]
 
 
-    plt.close('all')
+
     #plt.scatter(iteration, train_target)
-
 
     X_test = np.linspace(0, len(trainloss), len(trainloss))
     X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
     X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
 
 
-    X_test4 = np.linspace(0, len(trainloss4), len(trainloss4))
-    X_test5 = np.linspace(0, len(trainloss5), len(trainloss5))
-    X_test6 = np.linspace(0, len(trainloss6), len(trainloss6))'''
+
+    plt.close('all')
 
     #plot with different alpha value
-    '''plt.figure(1)
-    plt.axis([0,5000,0,1.2])
+    plt.figure(1)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Validation Loss with different alpha')
     plt.plot(X_test, trainloss, label='alpha=0.005')
     plt.plot(X_test2, trainloss2, label='alpha=0.001')
-    plt.plot(X_test3, trainloss3, label='alpha=0.0001')'''
+    plt.plot(X_test3, trainloss3, label='alpha=0.0001')
+    plt.legend()
 
     x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
     x=np.transpose(x)
     y=trainTarget
     #calculate normal equation
-    W2=normalMSE(x,y)
+    '''W2=normalMSE(x,y)
     loss=MSE(W2,x,y,0,0)
 
     print('loss batched: ',loss_batched)
-    print('loss normal: ',loss)
+    print('loss normal: ',loss)'''
+
+
+
+    #different reg value
+    W, b,trainloss4 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS, "MSE")
+    W1, b,trainloss5 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS,"MSE")
+    W2, b,trainloss6 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS, "MSE")
+
+
+    X_test4 = np.linspace(0, len(trainloss4), len(trainloss4))
+    X_test5 = np.linspace(0, len(trainloss5), len(trainloss5))
+    X_test6 = np.linspace(0, len(trainloss6), len(trainloss6))
 
     #plot with different reg value
-    '''plt.figure(2)
-    plt.title('Generalization')
+    plt.figure(2)
+    plt.title('Test Loss with different reg')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.plot(X_test4, trainloss4, label='reg=0.001')
     plt.plot(X_test5, trainloss5, label='reg=0.1')
-    plt.plot(X_test6, trainloss6, label='reg=0.5')'''
-
+    plt.plot(X_test6, trainloss6, label='reg=0.5')
+    plt.legend()
 
     #training and validation
-    '''plt.figure(3)
+    plt.figure(3)
     ytrain=np.dot(W.flatten(),x)
     ytrain2=np.dot(W1.flatten(),x)
     ytrain3=np.dot(W2.flatten(),x)
@@ -286,13 +261,13 @@ def main():
     plt.scatter(ytrain2, trainTarget,label='alpha=0.001')
     plt.scatter(ytrain3, trainTarget,label='alpha=0.0001')
     plt.xlabel('input (x)')
-    plt.ylabel('target (t)')'''
+    plt.ylabel('target (t)')
     #X_test = np.linspace(-2, 2, 100)
     #yhat = np.dot(poly_map(X_test, poly_degree), W_opt[1:poly_degree+1]) +  W_opt[0]
     #plt.plot(X_test, yhat, 'r')
 
-    '''plt.legend()
-    plt.show()'''
+    plt.legend()
+    plt.show()
 
 
 main()
