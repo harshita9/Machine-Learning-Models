@@ -83,16 +83,15 @@ def gradCE(W, b, x, y, reg):
         yhat=1/(1+np.exp(-1*z))
 
 
-        ylogx=-1* np.dot(np.dot(y,np.log(yhat)),x)
-    
-        secondexpression=np.dot((1-y),np.log(1-np.dot(yhat,x)))
+        yandyhat=-1* np.dot(y,1-yhat)
 
+        secondexpression=np.dot((1-y), yhat)
 
-        crossloss=1/N * np.sum((ylogx-secondexpression))
+        grad_weight_decay_loss = reg * W
 
-        weight_decay_loss = reg * W
+        gradCE_weight = np.dot(yandyhat + secondexpression, x)/N + grad_weight_decay_loss
 
-        cross_entropy_loss = crossloss + weight_decay_loss
+        gradCE_bias = yandyhat + secondexpression
 
 
         return gradCE_weight, gradCE_bias
@@ -112,9 +111,9 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
     for i in range(iterations):
 
         #plot the losses
-        if lossType="MSE":
+        if lossType == "MSE":
             loss=MSE(W,b,x,y,reg)
-        elif lossType="CE":
+        elif lossType == "CE":
             loss=CE(W,b,x,y,reg)
         else:
             loss=MSE(W,b,x,y,reg)
@@ -122,9 +121,9 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         train_loss.append(loss)
 
         #plot the losses
-        if lossType="MSE":
+        if lossType == "MSE":
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
-        elif lossType="CE":
+        elif lossType == "CE":
             weight_gradient, bias_gradient = gradCE(W,b,x,y,reg)
         else:
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
@@ -198,9 +197,9 @@ def main():
     alpha2 = 0.0001
 
     #different alpha value
-    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
-    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS)
-    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS)
+    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS, "MSE")
+    W1, b,trainloss2 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS, "MSE")
+    W2, b,trainloss3 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS, "MSE")
 
     '''loss_batched=trainloss[len(trainloss)-1]
     #different reg value
