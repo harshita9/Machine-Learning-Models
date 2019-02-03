@@ -242,6 +242,7 @@ def main():
     plt.legend()
     plt.show()
 
+
 main()
 
 '''W=np.array([[1],[2],[3]])
