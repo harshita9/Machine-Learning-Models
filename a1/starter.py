@@ -206,12 +206,9 @@ def main():
     plt.plot(X_test2, trainloss2, label='reg=0.1')
     plt.plot(X_test3, trainloss3, label='alpha=0.5')'''
 
-<<<<<<< HEAD
     W, b = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS)
     W, b = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS)
     W, b = grad_descent(W, b, testData, testTarget, alpha, iterations, reg, EPS)
-=======
->>>>>>> d3081257d3f3eb97a8448c042d497e3884155b3e
 
     '''plt.legend()
     plt.show()'''
