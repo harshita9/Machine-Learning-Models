@@ -128,6 +128,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             weight_gradient, bias_gradient = gradMSE(W,b,x,y,reg)
 
+<<<<<<< HEAD
         if (weight_check):
             #Calculate the direction of the gradient of weight vector
             norm_weight_grad= np.linalg.norm(weight_gradient)
@@ -159,6 +160,28 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
         if (not bias_check and not weight_check):
             break
+=======
+        # Calulate optimal weight an bias
+
+        # Calculate the direction of the gradient of weight vector
+        norm_weight_grad = np.linalg.norm(weight_gradient)
+        weight_direction = -1 * weight_gradient / norm_weight_grad
+        # Calculate the direction of the gradient of bias vector
+        norm_bias_grad = np.linalg.norm(bias_gradient)
+        bias_direction = -1 * bias_gradient / norm_bias_grad
+        # Calculate the new weight and bias vector
+        new_w = W + alpha * weight_direction
+        new_b = b + alpha * bias_direction
+        # weight error
+        difference = np.linalg.norm(new_w - W) ** 2
+        # checking if new_w (new weight) is minimum
+        if(difference < EPS):
+            # minimum/final weight array found
+            break
+        else:
+            W = new_w
+            b = new_b
+>>>>>>> 2daa4a3cb91a1172dc789df991bb23b708f61836
 
     return W,b,train_loss
 
