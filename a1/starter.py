@@ -1,7 +1,7 @@
 import tensorflow as tf
+import time
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 def loadData():
     with np.load('notMNIST.npz') as data :
@@ -23,7 +23,7 @@ def loadData():
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
 def MSE(W, b, x, y, reg):
-
+    # variable to store total loss (L = L)
     total_loss = 0
 
     N = len(x)
@@ -81,8 +81,8 @@ def gradCE(W, b, x, y, reg):
         N = len(x)
 
         z = np.dot(W.flatten(), x) + b
-        yhat=1/(1+np.exp(-1*z))
 
+        yhat=1/(1+np.exp(-1*z))
 
         yandyhat=-1* np.dot(y,1-yhat)
 
@@ -90,10 +90,9 @@ def gradCE(W, b, x, y, reg):
 
         grad_weight_decay_loss = reg * W
 
-        gradCE_weight = np.dot(yandyhat + secondexpression, x)/N + grad_weight_decay_loss
+        gradCE_weight = np.dot(yandyhat + secondexpression, x) / N + grad_weight_decay_loss
 
-        gradCE_bias = yandyhat + secondexpression
-
+        gradCE_bias = (yandyhat + secondexpression) / N
 
         return gradCE_weight, gradCE_bias
 
@@ -116,7 +115,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         if lossType == "MSE":
             loss = MSE(W,b,x,y,reg)
         elif lossType == "CE":
-            loss=crossEntropyLoss(W,b,x,y,reg)
+            loss = crossEntropyLoss(W,b,x,y,reg)
         else:
             loss = MSE(W,b,x,y,reg)
         # append loss to train_loss for plotting
@@ -142,54 +141,85 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         new_w = W + alpha * weight_direction
         new_b = b + alpha * bias_direction
         # weight error
-        #difference = np.linalg.norm(new_w - W) ** 2
+        difference = np.linalg.norm(new_w - W) ** 2
         # checking if new_w (new weight) is minimum
-        if(norm_weight_grad < EPS):
+        if(difference < EPS):
             # minimum/final weight array found
             break
         else:
             W = new_w
             b = new_b
 
-    # get total loss based on lossType (default is MSE)
+    #Get final loss
     if lossType == "MSE":
         loss = MSE(W,b,x,y,reg)
     elif lossType == "CE":
-        loss=crossEntropyLoss(W,b,x,y,reg)
+        loss = crossEntropyLoss(W,b,x,y,reg)
     else:
         loss = MSE(W,b,x,y,reg)
 
     train_loss.append(loss)
-
+    
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
+    #W = tf.tructated_normal([784,1],0.5)
+    W = tf.Variable(tf.zeros[28 * 28, 1], name="weights")
+    b = tf.Variable(tf.zeros[1], name="biases")
+
+    x = tf.placeholder(tf.float32, [None, 784], name="data")
+    #x = tf.reshape(x, [None, 28 * 28])
+    labels = tf.placeholder(tf.float32,[None,1], name="labels")
+    reg = tf.placeholder(tf.float32, name="reg")
+    learning_rate = tf.placeholder(tf.float32, name='learning_rate')
+
+
     tf.set_random_seed(421)
+
+
+    total_loss = 0
+
     if loss == "MSE":
-        pass
-    # Your implementation
+        predicted_y = tf.matmul(x, W) + b
+        yhat = tf.sigmoid(tf.matmul(x, W) + b)
+        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=linear_pred_y), name="cross_entropy_loss")
+        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+
+        total_loss = ce + wd
+
     elif loss == "CE":
-        pass
-    #Your implementation here
+        predicted_y = tf.matmul(x, W) + b
+        yhat = tf.sigmoid(predicted_y)
+        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
+        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+
+        total_loss = ce + wd
+
+
+
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
+    adam_optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+    init = tf.global_variables_initializer()
+
+return
 
 
 def normalMSE(x,y,reg):
-    
+
     inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
     w=np.dot(np.dot(inversexx,np.transpose(x)).T,y)
-
-
     return w
 
+
 def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter):
+    #initialize W and bias
     W = np.zeros(Data.shape[1] * Data.shape[2])
     W1 = np.zeros(Data.shape[1] * Data.shape[2])
     W2 = np.zeros(Data.shape[1] * Data.shape[2])
 
-    b = np.zeros(1)
-
-
+    b=np.zeros(1)
     #Get the optimized weight, bias and the loss
     W, b,trainloss = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
     print('MSE loss 1: ', trainloss[len(trainloss)-1])
@@ -231,16 +261,18 @@ def main():
 
 
     iterations = 5000
+    reg = 0
+
+    reg1=0.001
+    reg2= 0.1
+    reg3= 0.5
     EPS = 1 * 10 ** (-7)
 
-
-
-    plt.close('all')
-    #Tuning the Learing Rate Plot losses
-    reg = 0
     alpha = 0.005
     alpha1 = 0.001
     alpha2 = 0.0001
+    plt.close('all')
+    #Tuning the Learning Rate Plot, Plot losses
     plt.figure(1)
     #Training losses
     plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha")
@@ -266,9 +298,6 @@ def main():
     plotlinearRegression(testData, testTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
 
 
-    plt.show()
-
-
     #Comparing Batch GD with normal equation
     startBatched=time.time()
     W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg1, EPS, "MSE")
@@ -278,19 +307,19 @@ def main():
     x=np.transpose(x)
     y=trainTarget
 
+    #Calcualate error for batch GD
     loss_batched=MSE(W,b,x,y,reg1)
     #calculate normal equation
-    startnormal=time.time()
-    W3=normalMSE(x,y,reg1)
-    print('computation time normal: ',time.time()-startnormal)
-    loss=MSE(W3,0,x,y,reg1)
+    W2=normalMSE(x,y)
+    loss=MSE(W2,x,y,0,0)
 
     print('loss batched: ',loss_batched)
     print('loss normal: ',loss)
 
+    #plot with different reg value
 
 
-
+    plt.show()
 
 
 main()
