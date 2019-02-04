@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 def loadData():
     with np.load('notMNIST.npz') as data :
@@ -115,11 +116,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         if lossType == "MSE":
             loss = MSE(W,b,x,y,reg)
         elif lossType == "CE":
-<<<<<<< HEAD
             loss=crossEntropyLoss(W,b,x,y,reg)
-=======
-            loss = crossEntropyLoss(W,b,x,y,reg)
->>>>>>> ad8d5ecc26400713b4499215554f9e40012bc3cf
         else:
             loss = MSE(W,b,x,y,reg)
         # append loss to train_loss for plotting
@@ -154,6 +151,16 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             W = new_w
             b = new_b
 
+    # get total loss based on lossType (default is MSE)
+    if lossType == "MSE":
+        loss = MSE(W,b,x,y,reg)
+    elif lossType == "CE":
+        loss=crossEntropyLoss(W,b,x,y,reg)
+    else:
+        loss = MSE(W,b,x,y,reg)
+
+    train_loss.append(loss)
+
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
@@ -167,11 +174,50 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
     #Your implementation here
 
 
-def normalMSE(x,y):
-    inversexx = np.linalg.inv(np.dot(np.transpose(x),x))
-    w = np.dot(np.dot(inversexx,np.transpose(x),y))
+def normalMSE(x,y,reg):
+    #xtransopose=x.T
+    inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
+    w=np.dot(np.dot(inversexx,np.transpose(x)).T,y)
+
 
     return w
+
+def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter):
+    W = np.zeros(Data.shape[1] * Data.shape[2])
+    W1 = np.zeros(Data.shape[1] * Data.shape[2])
+    W2 = np.zeros(Data.shape[1] * Data.shape[2])
+
+    b = np.zeros(1)
+
+
+
+    W, b,trainloss = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
+    print('MSE loss 1: ', trainloss[len(trainloss)-1])
+    W1, b,trainloss2 = grad_descent(W, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
+    print('MSE loss 2: ', trainloss2[len(trainloss2)-1])
+    W2, b,trainloss3 = grad_descent(W, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
+    print('MSE loss 3: ', trainloss3[len(trainloss)-1])
+
+
+    #plotting
+    X_test = np.linspace(0, len(trainloss), len(trainloss))
+    X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
+    X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Testing Loss with different ',parameter)
+    if(patameter=="alpha"):
+        plt.plot(X_test, trainloss, label='alpha=0.005')
+        plt.plot(X_test2, trainloss2, label='alpha=0.001')
+        plt.plot(X_test3, trainloss3, label='alpha=0.0001')
+    else:
+        plt.plot(X_test, trainloss, label='reg=0.001')
+        plt.plot(X_test2, trainloss2, label='reg=0.1')
+        plt.plot(X_test3, trainloss3, label='reg=0.5')
+
+    plt.legend()
+    return
 
 #if __name__ == "__main__":
 def main():
@@ -185,94 +231,62 @@ def main():
 
 
     iterations = 5000
-    reg = 0
-
-    reg1=0.001
-    reg2= 0.1
-    reg3= 0.5
     EPS = 1 * 10 ** (-7)
-
-    alpha = 0.005
-    alpha1 = 0.001
-    alpha2 = 0.0001
-
-    #different alpha value
-    W, b,trainloss = grad_descent(W, b, validData, validTarget, alpha, iterations, reg, EPS, "MSE")
-    W1, b,trainloss2 = grad_descent(W, b, validData, validTarget, alpha1, iterations, reg, EPS,"MSE")
-    W2, b,trainloss3 = grad_descent(W, b, validData, validTarget, alpha2, iterations, reg, EPS,"MSE")
-
-    #loss_batched=trainloss[len(trainloss)-1]
-
-
-
-    #plt.scatter(iteration, train_target)
-
-    X_test = np.linspace(0, len(trainloss), len(trainloss))
-    X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
-    X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
 
 
 
     plt.close('all')
-
-    #plot with different alpha value
+    #Tuning the Learing Rate Plot losses
+    reg = 0
+    alpha = 0.005
+    alpha1 = 0.001
+    alpha2 = 0.0001
     plt.figure(1)
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.title('Validation Loss with different alpha')
-    plt.plot(X_test, trainloss, label='alpha=0.005')
-    plt.plot(X_test2, trainloss2, label='alpha=0.001')
-    plt.plot(X_test3, trainloss3, label='alpha=0.0001')
-    plt.legend()
+    #Training losses
+    plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha")
+    #Validation losses
+    plotlinearRegression(validData, validTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
+    #Testing Losses
+    plotlinearRegression(testData, testTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
+
+    #Generalization
+    reg1=0.001
+    reg2= 0.1
+    reg3= 0.5
+    plt.figure(2)
+    #Training losses
+    plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+    #Validation losses
+    plotlinearRegression(validData, validTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+    #Testing Losses
+    plotlinearRegression(testData, testTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+
+
+    plt.show()
+
+
+    #Comparing Batch GD with normal equation
+    startBatched=time.time()
+    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg1, EPS, "MSE")
+    print('computation time batched GD: ',time.time()-startBatched)
 
     x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
     x=np.transpose(x)
     y=trainTarget
+
+    loss_batched=MSE(W,b,x,y,reg1)
     #calculate normal equation
-    '''W2=normalMSE(x,y)
-    loss=MSE(W2,x,y,0,0)
+    startnormal=time.time()
+    W3=normalMSE(x,y,reg1)
+    print('computation time normal: ',time.time()-startnormal)
+    loss=MSE(W3,0,x,y,reg1)
 
     print('loss batched: ',loss_batched)
-    print('loss normal: ',loss)'''
+    print('loss normal: ',loss)
 
 
 
-    #different reg value
-    W, b,trainloss4 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg1, EPS, "MSE")
-    W1, b,trainloss5 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg2, EPS,"MSE")
-    W2, b,trainloss6 = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg3, EPS, "MSE")
 
-
-    X_test4 = np.linspace(0, len(trainloss4), len(trainloss4))
-    X_test5 = np.linspace(0, len(trainloss5), len(trainloss5))
-    X_test6 = np.linspace(0, len(trainloss6), len(trainloss6))
-
-    #plot with different reg value
-    plt.figure(2)
-    plt.title('Test Loss with different reg')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.plot(X_test4, trainloss4, label='reg=0.001')
-    plt.plot(X_test5, trainloss5, label='reg=0.1')
-    plt.plot(X_test6, trainloss6, label='reg=0.5')
-    plt.legend()
-
-    #training and validation
-    plt.figure(3)
-    ytrain=np.dot(W.flatten(),x)
-    ytrain2=np.dot(W1.flatten(),x)
-    ytrain3=np.dot(W2.flatten(),x)
-    plt.scatter(ytrain, trainTarget,label='alpha=0.005')
-    plt.scatter(ytrain2, trainTarget,label='alpha=0.001')
-    plt.scatter(ytrain3, trainTarget,label='alpha=0.0001')
-    plt.xlabel('input (x)')
-    plt.ylabel('target (t)')
-    #X_test = np.linspace(-2, 2, 100)
-    #yhat = np.dot(poly_map(X_test, poly_degree), W_opt[1:poly_degree+1]) +  W_opt[0]
-    #plt.plot(X_test, yhat, 'r')
-
-    plt.legend()
-    plt.show()
 
 
 main()
