@@ -22,7 +22,7 @@ def loadData():
     return trainData, validData, testData, trainTarget, validTarget, testTarget
 
 def MSE(W, b, x, y, reg):
-
+    # variable to store total loss (L = L)
     total_loss = 0
 
     N = len(x)
@@ -148,7 +148,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             W = new_w
             b = new_b
-            
+
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
