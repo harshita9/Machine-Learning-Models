@@ -80,8 +80,8 @@ def gradCE(W, b, x, y, reg):
         N = len(x)
 
         z = np.dot(W.flatten(), x) + b
-        yhat=1/(1+np.exp(-1*z))
 
+        yhat=1/(1+np.exp(-1*z))
 
         yandyhat=-1* np.dot(y,1-yhat)
 
@@ -89,10 +89,9 @@ def gradCE(W, b, x, y, reg):
 
         grad_weight_decay_loss = reg * W
 
-        gradCE_weight = np.dot(yandyhat + secondexpression, x)/N + grad_weight_decay_loss
+        gradCE_weight = np.dot(yandyhat + secondexpression, x) / N + grad_weight_decay_loss
 
-        gradCE_bias = yandyhat + secondexpression
-
+        gradCE_bias = (yandyhat + secondexpression) / N
 
         return gradCE_weight, gradCE_bias
 
@@ -149,18 +148,45 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         else:
             W = new_w
             b = new_b
-
+            
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
+    #W = tf.tructated_normal([784,1],0.5)
+    W = tf.Variable(tf.zeros[28 * 28, 1], name="weights")
+    b = tf.Variable(tf.zeros[1], name="biases")
+
+    x = tf.placeholder(tf.float32, [None, 784], name="data")
+    #x = tf.reshape(x, [None, 28 * 28])
+    labels = tf.placeholder(tf.float32,[None,1], name="labels")
+    reg = tf.placeholder(tf.float32, name="reg")
+    learning_rate = tf.placeholder(tf.float32, name='learning_rate')
+
     tf.set_random_seed(421)
+
+    total_loss = 0
+
     if loss == "MSE":
-        pass
-    # Your implementation
+        predicted_y = tf.matmul(x, W) + b
+        yhat = tf.sigmoid(tf.matmul(x, W) + b)
+        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=linear_pred_y), name="cross_entropy_loss")
+        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+
+        total_loss = ce + wd
+
     elif loss == "CE":
-        pass
-    #Your implementation here
+        predicted_y = tf.matmul(x, W) + b
+        yhat = tf.sigmoid(predicted_y)
+        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
+        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+
+        total_loss = ce + wd
+
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
+    adam_optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+    init = tf.global_variables_initializer()
 
 
 def normalMSE(x,y):
