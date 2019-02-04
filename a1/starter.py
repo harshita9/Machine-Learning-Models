@@ -175,7 +175,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
 
 def normalMSE(x,y,reg):
-    #xtransopose=x.T
+    
     inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
     w=np.dot(np.dot(inversexx,np.transpose(x)).T,y)
 
@@ -190,7 +190,7 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     b = np.zeros(1)
 
 
-
+    #Get the optimized weight, bias and the loss
     W, b,trainloss = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
     print('MSE loss 1: ', trainloss[len(trainloss)-1])
     W1, b,trainloss2 = grad_descent(W, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
@@ -200,14 +200,16 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
 
 
     #plotting
-    X_test = np.linspace(0, len(trainloss), len(trainloss))
-    X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
-    X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
+    X_test = np.linspace(0, len(trainloss)-1, len(trainloss)-1)
+    X_test2 = np.linspace(0, len(trainloss2)-1, len(trainloss2)-1)
+    X_test3 = np.linspace(0, len(trainloss3)-1, len(trainloss3)-1)
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Testing Loss with different ',parameter)
-    if(patameter=="alpha"):
+    plt.title('Testing Loss with different '+ parameter)
+
+    #plot the graph
+    if(parameter=="alpha"):
         plt.plot(X_test, trainloss, label='alpha=0.005')
         plt.plot(X_test2, trainloss2, label='alpha=0.001')
         plt.plot(X_test3, trainloss3, label='alpha=0.0001')
@@ -224,8 +226,6 @@ def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
     W = np.zeros(trainData.shape[1] * trainData.shape[2])
-    W1 = np.zeros(trainData.shape[1] * trainData.shape[2])
-    W2 = np.zeros(trainData.shape[1] * trainData.shape[2])
 
     b = np.zeros(1)
 
@@ -245,21 +245,25 @@ def main():
     #Training losses
     plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha")
     #Validation losses
+    plt.figure(2)
     plotlinearRegression(validData, validTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
     #Testing Losses
+    plt.figure(3)
     plotlinearRegression(testData, testTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
 
     #Generalization
     reg1=0.001
     reg2= 0.1
     reg3= 0.5
-    plt.figure(2)
+    plt.figure(4)
     #Training losses
-    plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
     #Validation losses
-    plotlinearRegression(validData, validTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plt.figure(5)
+    plotlinearRegression(validData, validTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
     #Testing Losses
-    plotlinearRegression(testData, testTarget,alpha,alpha,alpha,interations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plt.figure(6)
+    plotlinearRegression(testData, testTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
 
 
     plt.show()
