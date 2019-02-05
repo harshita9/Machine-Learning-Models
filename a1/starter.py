@@ -165,52 +165,49 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
-    #W = tf.tructated_normal([784,1],0.5)
-    W = tf.Variable(tf.zeros[28 * 28, 1], name="weights")
-    b = tf.Variable(tf.zeros[1], name="biases")
+    W = tf.Variable(tf.tructated_normal(shape = (784, 1), stddev=0.5, dtype = tf.float32, name="weights"))
+    b = tf.Variable(tf.zeros[1], name="biases", dtype = tf.float32)
 
     x = tf.placeholder(tf.float32, [None, 784], name="data")
-    #x = tf.reshape(x, [None, 28 * 28])
     y = tf.placeholder(tf.float32,[None,1], name="labels")
-    predicted_y = tf.placeholder(tf.float32,[None,1], name="predicted_labels")
+
     reg = tf.placeholder(tf.float32, name="reg")
     learning_rate = tf.placeholder(tf.float32, name='learning_rate')
 
-
     tf.set_random_seed(421)
 
-
+    predicted_y = 0
     total_loss = 0
 
     if loss == "MSE":
-        predicted_y = tf.matmul(x, W) + b
-        error= predicted_y-y
-        mse = 1/2*tf.reduce_mean(tf.square(error),name="mse")
-        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+        predicted_y = tf.matmul(tf.transpose(W), x) + b
+        error = predicted_y - y
+        mse = (1/2) * tf.reduce_mean(tf.square(error), name="mse")
+        wd = (reg/2) * tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
 
         total_loss = mse + wd
 
     elif loss == "CE":
-        predicted_y = tf.matmul(tf.transpose(W),x) + b
+        predicted_y = tf.matmul(tf.transpose(W), x) + b
         yhat = tf.sigmoid(predicted_y)
-        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
-        wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+        ce = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
+        wd = (reg/2) * tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
 
         total_loss = ce + wd
 
 
-
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate, name="GradientDescent").minimize(loss)
     adam_optimizer = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
-    init = tf.global_variables_initializer()
 
-    '''with tf.Session() as sess:
-        sess.run(init)
+    return W,b,predicted_y,y,total_loss,reg,optimizer,adam_optimizer
 
-        for epoch in range)'''
+def SGD():
+        init = tf.global_variables_initializer()
 
-    return W,b,predicted_y,y,total_loss,reg
+        with tf.Session() as sess:
+            sess.run(init)
+
 
 
 def normalMSE(x,y,reg):
@@ -230,7 +227,7 @@ def calculateAccuracy(W,b,x,y):
     correct=0
 
     for i in range(0,len(y)):
-        if((yhat[i]<=0 and y[i]==0) or (yhat[i]>0 and y[i]==1)):
+        if((yhat[i]<0 and y[i]==0) or (yhat[i]>=0 and y[i]==1)):
             correct=correct+1;
 
     return float(correct/len(y))*100
@@ -358,7 +355,7 @@ def main():
 
     #calculate normal equation
     startNormal=time.time()
-    W2=normalMSE(x,y,reg1)
+    W2=normalMSE(x,y,0)
     print('computation time Normal: ',time.time()-startNormal)
 
     loss=MSE(W2,0,x,y,reg1)
