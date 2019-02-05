@@ -53,7 +53,7 @@ def gradMSE(W, b, x, y, reg):
     # calculate gradient with respect to weights
     gradMSE_weights = np.dot(MSE, np.transpose(x))
     grad_weight_decay_loss = reg * W
-    gradMSE_weights = np.transpose(gradMSE_weight / N) + grad_weight_decay_loss
+    gradMSE_weights = np.transpose(gradMSE_weights / N) + grad_weight_decay_loss
 
     # calculate gradient with respect to biases
     gradMSE_biases = np.sum(MSE / N)
@@ -117,6 +117,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
     i = 0
     train_loss = []
+    acc=[]
 
     for i in range(iterations):
         # get total loss based on lossType (default is MSE)
@@ -158,21 +159,9 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             W = new_w
             b = new_b
 
-<<<<<<< HEAD
-    
-=======
-    #Get final loss
-    if lossType == "MSE":
-        loss = MSE(W,b,x,y,reg)
-    elif lossType == "CE":
-        loss = crossEntropyLoss(W,b,x,y,reg)
-    else:
-        loss = MSE(W,b,x,y,reg)
 
-    train_loss.append(loss)
->>>>>>> 5b93aea69300bbfa7ed1c28e345cd86cd8c82068
 
-    return W,b,train_loss
+    return W,b,train_loss,acc
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
@@ -182,7 +171,8 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     x = tf.placeholder(tf.float32, [None, 784], name="data")
     #x = tf.reshape(x, [None, 28 * 28])
-    labels = tf.placeholder(tf.float32,[None,1], name="labels")
+    y = tf.placeholder(tf.float32,[None,1], name="labels")
+    predicted_y = tf.placeholder(tf.float32,[None,1], name="predicted_labels")
     reg = tf.placeholder(tf.float32, name="reg")
     learning_rate = tf.placeholder(tf.float32, name='learning_rate')
 
@@ -194,14 +184,14 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     if loss == "MSE":
         predicted_y = tf.matmul(x, W) + b
-        yhat = tf.sigmoid(tf.matmul(x, W) + b)
-        ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=linear_pred_y), name="cross_entropy_loss")
+        error= predicted_y-y
+        mse = 1/2*tf.reduce_mean(tf.square(error),name="mse")
         wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
 
-        total_loss = ce + wd
+        total_loss = mse + wd
 
     elif loss == "CE":
-        predicted_y = tf.matmul(x, W) + b
+        predicted_y = tf.matmul(tf.transpose(W),x) + b
         yhat = tf.sigmoid(predicted_y)
         ce = tf.reduce_mean(tf.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
         wd = tf.multiply(lamb / 2, tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
@@ -215,7 +205,12 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     init = tf.global_variables_initializer()
 
-    return
+    '''with tf.Session() as sess:
+        sess.run(init)
+
+        for epoch in range)'''
+
+    return W,b,predicted_y,y,total_loss,reg
 
 
 def normalMSE(x,y,reg):
@@ -235,7 +230,7 @@ def calculateAccuracy(W,b,x,y):
     correct=0
 
     for i in range(0,len(y)):
-        if((yhat[i]<0 and y[i]<0) or (yhat[i]>0 and y[i]>0)):
+        if((yhat[i]<=0 and y[i]==0) or (yhat[i]>0 and y[i]==1)):
             correct=correct+1;
 
     return float(correct/len(y))*100
@@ -256,30 +251,25 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     y=Target
 
     #Get the optimized weight, bias and the loss
-    W, b,trainloss = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
+    W, b,trainloss,acc = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
     print('MSE loss 1: ', trainloss[len(trainloss)-1])
 
     #Get accuracy for each
     accuracy= calculateAccuracy(W,b,x,y)
     print('accuracy 1: ',accuracy, '%')
 
-    W1, b,trainloss2 = grad_descent(W1, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
+    W1, b,trainloss2,acc = grad_descent(W1, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
     print('MSE loss 2: ', trainloss2[len(trainloss2)-1])
-<<<<<<< HEAD
     #Get accuracy for each
     accuracy= calculateAccuracy(W1,b,x,y)
     print('accuracy 2: ',accuracy, '%')
 
-    W2, b,trainloss3 = grad_descent(W2, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
+    W2, b,trainloss3,acc = grad_descent(W2, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
     print('MSE loss 3: ', trainloss3[len(trainloss3)-1])
 
     #Get accuracy for each
     accuracy= calculateAccuracy(W2,b,x,y)
     print('accuracy 3: ',accuracy,'%')
-=======
-    W2, b,trainloss3 = grad_descent(W, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
-    print('MSE loss 3: ', trainloss3[len(trainloss3)-1])
->>>>>>> 5b93aea69300bbfa7ed1c28e345cd86cd8c82068
 
 
     #plotting
@@ -353,7 +343,7 @@ def main():
 
     #Comparing Batch GD with normal equation
     startBatched=time.time()
-    W, b,trainloss = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg1, EPS, "MSE")
+    W, b,trainloss,acc = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg1, EPS, "MSE")
     print('computation time batched GD: ',time.time()-startBatched)
 
     x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
@@ -379,8 +369,9 @@ def main():
 
     print('loss batched: ',loss_batched)
     print('loss normal: ',loss)
+    plt.show()
 
-
+'''
     W3 = np.zeros(Data.shape[1] * Data.shape[2])
 
     b=np.zeros(1)
@@ -389,9 +380,9 @@ def main():
     W3, b, trainloss4 = grad_descent(W, b, Data, Target, alpha, 5000, 0.1, EPS, "CE")
     print('CE loss: ', trainloss4[len(trainloss4)-1])
 
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.title('Testing Loss with different '+ parameter)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Testing Loss with different '+ parameter)
 
         #plot the graph
         if(parameter=="alpha"):
@@ -399,10 +390,10 @@ def main():
 
 
     #plotting
-    X_test4 = np.linspace(0, len(trainloss4)-1, len(trainloss4)-1)
+    X_test4 = np.linspace(0, len(trainloss4)-1, len(trainloss4)-1)'''
 
 
-    plt.show()
+
 
 
 main()
