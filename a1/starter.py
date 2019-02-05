@@ -71,11 +71,13 @@ def crossEntropyLoss(W, b, x, y, reg):
     yhat = 1 / (1 + np.exp(-1 * z))
 
     # get values of inner expressions
-    firstexpression = -1 * np.dot(np.dot(y, np.log(yhat)),x)
-    secondexpression = np.dot((1 - y), np.log(1 - np.dot(yhat,x)))
+    firstexpression = -1 * np.dot(np.dot(y.flatten(), np.log(yhat)), x)
+    secondexpression = 1 - y
+    thirdexpression = np.log(1 - np.dot(x, yhat))
+    fourthexpression = np.dot(secondexpression, thirdexpression.reshape(thirdexpression.shape[0],1).T)
 
     # calculate cross entropy loss
-    crossEntropyLoss = (1 / N) * np.sum((firstexpression - secondexpression))
+    crossEntropyLoss = (1 / N) * np.sum((firstexpression - fourthexpression.T))
     # calculate weight decay loss
     weight_decay_loss = (reg / 2) * (np.linalg.norm(W) ** 2)
     # calculate total cross entropy loss
@@ -94,13 +96,13 @@ def gradCE(W, b, x, y, reg):
         z = np.dot(W.flatten(), x) + b
         yhat = 1 / (1 + np.exp(-1 * z))
         # get values of inner expressions
-        firstexpression = -1 * np.dot(y, 1 - yhat)
-        secondexpression = np.dot((1 - y), yhat)
+        firstexpression = -1 * np.dot(y.flatten(), 1 - yhat)
+        secondexpression = np.dot((1 - y), yhat.reshape(yhat.shape[0],1).T)
         # calculate gradient with respect to weights
         grad_weight_decay_loss = reg * W
-        gradCE_weight = np.dot(firstexpression + secondexpression, x) / N + grad_weight_decay_loss
+        gradCE_weight = np.dot(firstexpression + secondexpression, x.T) / N + grad_weight_decay_loss
         # calculate gradient with respect to biases
-        gradCE_bias = (firstexpression + secondexpression) / N
+        gradCE_bias = np.sum(firstexpression + secondexpression) / N
 
         return gradCE_weight, gradCE_bias
 
@@ -117,7 +119,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
     i = 0
     train_loss = []
-    acc=[]
+    accuracy = []
 
     for i in range(iterations):
         # get total loss based on lossType (default is MSE)
@@ -125,6 +127,8 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             loss = MSE(W,b,x,y,reg)
         elif lossType == "CE":
             loss = crossEntropyLoss(W,b,x,y,reg)
+            acc = calculateAccuracy(W,b,x,y)
+            accuracy.append(acc)
         else:
             loss = MSE(W,b,x,y,reg)
         # append loss to train_loss for plotting
@@ -234,7 +238,7 @@ def calculateAccuracy(W,b,x,y):
 
 
 
-def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter):
+def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter, lossType):
     #initialize W and bias
     W = np.zeros(Data.shape[1] * Data.shape[2])
     W1 = np.zeros(Data.shape[1] * Data.shape[2])
@@ -291,6 +295,7 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     plt.legend()
     return
 
+
 #if __name__ == "__main__":
 def main():
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
@@ -307,20 +312,20 @@ def main():
 
 
     plt.close('all')
-    #Tuning the Learning Rate Plot, Plot losses
+    '''#Tuning the Learning Rate Plot, Plot losses
     alpha = 0.005
     alpha1 = 0.001
     alpha2 = 0.0001
     print('Learning Rate')
     plt.figure(1)
     #Training losses
-    plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha")
+    plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha", "MSE")
     #Validation losses
     plt.figure(2)
-    plotlinearRegression(validData, validTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
+    plotlinearRegression(validData, validTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha", "MSE")
     #Testing Losses
     plt.figure(3)
-    plotlinearRegression(testData, testTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha")
+    plotlinearRegression(testData, testTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS, "alpha", "MSE")
 
     #Generalization
     reg1=0.001
@@ -329,13 +334,13 @@ def main():
     print('Regularization')
     plt.figure(4)
     #Training losses
-    plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter", "MSE")
     #Validation losses
     plt.figure(5)
-    plotlinearRegression(validData, validTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plotlinearRegression(validData, validTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter", "MSE")
     #Testing Losses
     plt.figure(6)
-    plotlinearRegression(testData, testTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
+    plotlinearRegression(testData, testTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter", "MSE")
 
 
     #Comparing Batch GD with normal equation
@@ -365,31 +370,64 @@ def main():
     print('accuracy normal: ',accuracy)
 
     print('loss batched: ',loss_batched)
-    print('loss normal: ',loss)
-    plt.show()
+
+    print('loss normal: ',loss)'''
+
+
+    #Tuning the Learning Rate Plot, Plot losses (logistic regression)
+    reg = 0.1
+    alpha = 0.005
+    alpha1 = 0.001
+    alpha2 = 0.0001
+    print('Learning Rate')
+
+    #print('loss normal: ',loss)
+    #plt.show()
 
 '''
     W3 = np.zeros(Data.shape[1] * Data.shape[2])
 
-    b=np.zeros(1)
-    #Get the optimized weight, bias and the loss
+    Weight = np.zeros(trainData.shape[1] * trainData.shape[2])
 
-    W3, b, trainloss4 = grad_descent(W, b, Data, Target, alpha, 5000, 0.1, EPS, "CE")
-    print('CE loss: ', trainloss4[len(trainloss4)-1])
+    b = np.zeros(1)
+    #print (W.shape)
+
+
+    #Get the optimized weight, bias and the loss
+    W, b, trainloss, acc = grad_descent(Weight, b, trainData, trainTarget, alpha, iterations, reg, EPS, "CE")
+    print('CE loss: ', trainloss[len(trainloss)-1])
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.title('Testing Loss with different '+ parameter)
 
-        #plot the graph
-        if(parameter=="alpha"):
-            plt.plot(X_test, trainloss, label='alpha=0.005')
+    x = trainData
+    x = x.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
+    x = np.transpose(x)
+    y = trainTarget
 
+    #Get accuracy for each
+    accuracy = calculateAccuracy(W,b,x,y)
+    print('accuracy: ',accuracy, '%')
 
     #plotting
-    X_test4 = np.linspace(0, len(trainloss4)-1, len(trainloss4)-1)'''
+    X_test = np.linspace(0, len(trainloss), len(trainloss))
+    X_test2 = np.linspace(0, len(acc), len(acc))
 
+    plt.figure(7)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('CE loss for training')
+    plt.plot(X_test, trainloss, label='loss')
 
+    plt.figure(8)
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('CE accuracy for training')
+    plt.plot(X_test2, acc, label='accuracy')
+    #plt.plot(X_test3, trainloss3, label='alpha=0.0001')
+
+    plt.legend()'''
 
 
 
