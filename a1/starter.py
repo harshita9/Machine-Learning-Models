@@ -150,16 +150,8 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             W = new_w
             b = new_b
 
-    #Get final loss
-    if lossType == "MSE":
-        loss = MSE(W,b,x,y,reg)
-    elif lossType == "CE":
-        loss = crossEntropyLoss(W,b,x,y,reg)
-    else:
-        loss = MSE(W,b,x,y,reg)
-
-    train_loss.append(loss)
     
+
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
@@ -203,7 +195,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     init = tf.global_variables_initializer()
 
-return
+    return
 
 
 def normalMSE(x,y,reg):
@@ -213,6 +205,23 @@ def normalMSE(x,y,reg):
     return w
 
 
+def calculateAccuracy(W,b,x,y):
+
+    yhat=np.dot(W.flatten(),x)+ b
+    yhat=yhat.flatten()
+    y=y.flatten()
+
+    #number of accurate data classified
+    correct=0
+
+    for i in range(0,len(y)):
+        if((yhat[i]<0 and y[i]<0) or (yhat[i]>0 and y[i]>0)):
+            correct=correct+1;
+
+    return float(correct/len(y))*100
+
+
+
 def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter):
     #initialize W and bias
     W = np.zeros(Data.shape[1] * Data.shape[2])
@@ -220,23 +229,42 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     W2 = np.zeros(Data.shape[1] * Data.shape[2])
 
     b=np.zeros(1)
+
+    #Get the x and y
+    x=Data.reshape(Data.shape[0],(Data.shape[1]*Data.shape[2]))
+    x=np.transpose(x)
+    y=Target
+
     #Get the optimized weight, bias and the loss
     W, b,trainloss = grad_descent(W, b, Data, Target, alpha, iterations, reg1, EPS, "MSE")
     print('MSE loss 1: ', trainloss[len(trainloss)-1])
-    W1, b,trainloss2 = grad_descent(W, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
+
+    #Get accuracy for each
+    accuracy= calculateAccuracy(W,b,x,y)
+    print('accuracy 1: ',accuracy, '%')
+
+    W1, b,trainloss2 = grad_descent(W1, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
     print('MSE loss 2: ', trainloss2[len(trainloss2)-1])
-    W2, b,trainloss3 = grad_descent(W, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
-    print('MSE loss 3: ', trainloss3[len(trainloss)-1])
+    #Get accuracy for each
+    accuracy= calculateAccuracy(W1,b,x,y)
+    print('accuracy 2: ',accuracy, '%')
+
+    W2, b,trainloss3 = grad_descent(W2, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
+    print('MSE loss 3: ', trainloss3[len(trainloss3)-1])
+
+    #Get accuracy for each
+    accuracy= calculateAccuracy(W2,b,x,y)
+    print('accuracy 3: ',accuracy,'%')
 
 
     #plotting
-    X_test = np.linspace(0, len(trainloss)-1, len(trainloss)-1)
-    X_test2 = np.linspace(0, len(trainloss2)-1, len(trainloss2)-1)
-    X_test3 = np.linspace(0, len(trainloss3)-1, len(trainloss3)-1)
+    X_test = np.linspace(0, len(trainloss), len(trainloss))
+    X_test2 = np.linspace(0, len(trainloss2), len(trainloss2))
+    X_test3 = np.linspace(0, len(trainloss3), len(trainloss3))
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Testing Loss with different '+ parameter)
+    plt.title('MSE with different '+ parameter)
 
     #plot the graph
     if(parameter=="alpha"):
@@ -263,16 +291,15 @@ def main():
     iterations = 5000
     reg = 0
 
-    reg1=0.001
-    reg2= 0.1
-    reg3= 0.5
     EPS = 1 * 10 ** (-7)
 
+
+    plt.close('all')
+    #Tuning the Learning Rate Plot, Plot losses
     alpha = 0.005
     alpha1 = 0.001
     alpha2 = 0.0001
-    plt.close('all')
-    #Tuning the Learning Rate Plot, Plot losses
+    print('Learning Rate')
     plt.figure(1)
     #Training losses
     plotlinearRegression(trainData, trainTarget,alpha,alpha1,alpha2,iterations,reg,reg,reg,EPS,"alpha")
@@ -287,6 +314,7 @@ def main():
     reg1=0.001
     reg2= 0.1
     reg3= 0.5
+    print('Regularization')
     plt.figure(4)
     #Training losses
     plotlinearRegression(trainData, trainTarget,alpha,alpha,alpha,iterations,reg1,reg2,reg3,EPS, "regularization parameter")
@@ -309,14 +337,24 @@ def main():
 
     #Calcualate error for batch GD
     loss_batched=MSE(W,b,x,y,reg1)
+    #Calcualate accuracy
+    accuracy= accuracy= calculateAccuracy(W,b,x,y)
+    print('accuracy batch: ',accuracy)
+
     #calculate normal equation
-    W2=normalMSE(x,y)
-    loss=MSE(W2,x,y,0,0)
+    startNormal=time.time()
+    W2=normalMSE(x,y,reg1)
+    print('computation time Normal: ',time.time()-startNormal)
+
+    loss=MSE(W2,0,x,y,reg1)
+
+    #Calcualate accuracy
+    accuracy= accuracy= calculateAccuracy(W2,0,x,y)
+    print('accuracy normal: ',accuracy)
 
     print('loss batched: ',loss_batched)
     print('loss normal: ',loss)
 
-    #plot with different reg value
 
 
     plt.show()
