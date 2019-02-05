@@ -165,7 +165,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
 
 
-    return W,b,train_loss,acc
+    return W,b,train_loss,accuracy
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
@@ -187,7 +187,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
         predicted_y = tf.matmul(tf.transpose(W), x) + b
         error = predicted_y - y
         mse = (1/2) * tf.reduce_mean(tf.square(error), name="mse")
-        wd = (reg/2) * tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+        wd = (reg/2) * tf.reduce_sum(tf.square(w), name="weight_decay_loss")
 
         total_loss = mse + wd
 
@@ -195,7 +195,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
         predicted_y = tf.matmul(tf.transpose(W), x) + b
         yhat = tf.sigmoid(predicted_y)
         ce = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y), name="cross_entropy_loss")
-        wd = (reg/2) * tf.reduce_sum(tf.square(w)), name="weight_decay_loss")
+        wd = (reg/2) * tf.reduce_sum(tf.square(w), name="weight_decay_loss")
 
         total_loss = ce + wd
 
@@ -384,8 +384,8 @@ def main():
     #print('loss normal: ',loss)
     #plt.show()
 
-'''
-    W3 = np.zeros(Data.shape[1] * Data.shape[2])
+
+    #W3 = np.zeros(Data.shape[1] * Data.shape[2])
 
     Weight = np.zeros(trainData.shape[1] * trainData.shape[2])
 
@@ -427,7 +427,7 @@ def main():
     plt.plot(X_test2, acc, label='accuracy')
     #plt.plot(X_test3, trainloss3, label='alpha=0.0001')
 
-    plt.legend()'''
+    plt.legend()
 
 
 
