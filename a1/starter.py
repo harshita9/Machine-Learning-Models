@@ -167,7 +167,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         loss = MSE(W,b,x,y,reg)
 
     train_loss.append(loss)
-    
+
     return W,b,train_loss
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
@@ -234,7 +234,7 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     W1, b,trainloss2 = grad_descent(W, b, Data, Target, alpha1, iterations, reg2, EPS,"MSE")
     print('MSE loss 2: ', trainloss2[len(trainloss2)-1])
     W2, b,trainloss3 = grad_descent(W, b, Data, Target, alpha2, iterations, reg3, EPS,"MSE")
-    print('MSE loss 3: ', trainloss3[len(trainloss)-1])
+    print('MSE loss 3: ', trainloss3[len(trainloss3)-1])
 
 
     #plotting
@@ -325,6 +325,26 @@ def main():
     print('loss normal: ',loss)
 
     #plot with different reg value
+
+    W3 = np.zeros(Data.shape[1] * Data.shape[2])
+
+    b=np.zeros(1)
+    #Get the optimized weight, bias and the loss
+
+    W3, b, trainloss4 = grad_descent(W, b, Data, Target, alpha, 5000, 0.1, EPS, "CE")
+    print('CE loss: ', trainloss4[len(trainloss4)-1])
+
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Testing Loss with different '+ parameter)
+
+        #plot the graph
+        if(parameter=="alpha"):
+            plt.plot(X_test, trainloss, label='alpha=0.005')
+
+
+    #plotting
+    X_test4 = np.linspace(0, len(trainloss4)-1, len(trainloss4)-1)
 
 
     plt.show()
