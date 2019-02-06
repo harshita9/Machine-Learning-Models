@@ -2,6 +2,7 @@ import tensorflow as tf
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from random import shuffle
 
 def loadData():
     with np.load('notMNIST.npz') as data :
@@ -160,9 +161,9 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         new_w = W + alpha * weight_direction
         new_b = b + alpha * bias_direction
         # weight error
-        difference = np.linalg.norm(new_w - W) ** 2
+        difference = np.linalg.norm(new_w - W)
         # checking if new_w (new weight) is minimum by checking the gradient
-        if(norm_weight_grad < EPS):
+        if(difference < EPS):
             # minimum/final weight array found
             break
         else:
@@ -175,7 +176,7 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
     #Initialize weight and bias tensors
-    W = tf.Variable(tf.truncated_normal(shape = (784, 1), stddev = 0.5, dtype = tf.float32, name="weights"))
+    W = tf.Variable(tf.truncated_normal(shape = (1,784), stddev = 0.5, dtype = tf.float32, name="weights"))
     b = tf.Variable(tf.zeros(1), name="biases")
     # create placeholders for x, y, reg, and alpha
     x = tf.placeholder(tf.float32, [784, None], name="data")
@@ -189,7 +190,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
     tf.set_random_seed(421)
 
     # calculate predicted y
-    predicted_y = tf.matmul(tf.transpose(W), x) + b
+    predicted_y = tf.matmul((W), x) + b
     # calculate weight_decay_loss
     wd = (reg/2) * tf.reduce_sum(tf.square(W), name="weight_decay_loss")
 
@@ -199,11 +200,12 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
     if lossType == "MSE":
         #error = predicted_y - y
         #mse = (1/2) * tf.reduce_mean(tf.square(error), name="mse")
-        loss = tf.losses.mean_squared_error(labels=y, predictions=predicted_y, name="mse")
+        loss = tf.losses.mean_squared_error(labels=y, predictions=predicted_y)
+        loss=1/2*(loss)
 
     elif lossType == "CE":
         yhat = tf.sigmoid(predicted_y)
-        loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y, name="cross_entropy_loss")
+        loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y)
 
     # calculate total loss
     total_loss = loss + wd
@@ -236,15 +238,16 @@ def calculateAccuracy(W,b,x,y):
 
     return float(correct/len(y))*100
 
-def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, lossType):
+
+def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, loss_Type):
 
 
-    W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate = buildGraph(lossType)
+    W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate = buildGraph(lossType=loss_Type)
 
     init = tf.global_variables_initializer()
 
     d = data.reshape(data.shape[0], data.shape[1] * data.shape[2])
-    l = trainTarget
+    l = labels.reshape(len(labels),1)
     #d = np.transpose(d)
 
     # get the number of batches
@@ -261,43 +264,98 @@ def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, lossT
     losses = []
     #W_new, b_new = 0, 0
     acc = []
-    d = np.transpose(d)
+    #d = np.transpose(d)
     with tf.Session() as sess:
         sess.run(init)
         # SGD algorithm
         # for each interation loop through all minibatches and run the session
-        epochLoss = []
-        a = []
-
-        for i in range(epochs):
-            for batch in batches:
-                X_batch = batch[0]
-                Y_batch = batch[1]
+        #epochLoss = np.zeros(int(num_batches+2))
+        #a = np.zeros(int(num_batches+2))
+        losses = []
+        #W_new, b_new = 0, 0
+        acc = []
+        for i in range(0,epochs):
+            a=[]
+            epochLoss = []
+            #d = np.random.shuffle(d)
+            #l=l[d[:,0]]
+            ind_list = [m for m in range(len(l))]
+            shuffle(ind_list)
+            d  = d[ind_list, :]
+            l = l[ind_list,]
+            for j in range(0,data.shape[0],minibatch_size):
+                X_batch = d[j:j + minibatch_size]
+                Y_batch = l[j:j + minibatch_size]
+                #X_batch = batch[0]
+                #Y_batch = batch[1]
                 X_batch = np.transpose(X_batch)
                 _, W_new, b_new, yhat, tl = sess.run([adam_optimizer, W, b, predicted_y, total_loss],
                 feed_dict={x:X_batch,reg:0, y:Y_batch, learning_rate:0.001})
-                epochLoss.append(total_loss)
-                #a.append(calculateAccuracy(W, b, d, l))
 
 
-        #W, b, predicted_y, y, total_loss, optimizer, reg = buildGraph(epsilon=1e-08, lossType="CE", learning_rate=0.001)
-            #acc.append(tf.reduce_mean(a))
-            losses.append(tf.reduce_mean(epochLoss))
-            #batches=tf.train.shuffle_batch(batches)
+                epochLoss.append(tl)
+                a.append(calculateAccuracy(W_new,b_new,(X_batch),Y_batch))
+
+
+
+
+            losses.append(np.mean(epochLoss))
+
+
+            acc.append(np.mean(a))
+
+
 
     print("Final Error", losses[len(losses)-1])
     print("Final Accuracy", acc[len(acc)-1])
 
-    return acc, losses
+    return losses, acc
 
-trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
-losses, acc = stochastic_gradient_descent(500, 700, 0, trainData, trainTarget, "MSE")
-print(losses[:10])
-print(acc[:10])
-#losses, acc = stochastic_gradient_descent(500, 700, 0, validData, validTarget, "MSE")
-#losses, acc = stochastic_gradient_descent(500, 700, 0, testData, testTarget, "MSE")
 
+def mainSGD(parameter,n=1,n2=2):
+    trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
+
+    losses, acc = stochastic_gradient_descent(500, 700, 0, trainData, trainTarget, parameter)
+    losses1, acc1 = stochastic_gradient_descent(500, 700, 0, validData, validTarget, parameter)
+    losses2, acc2 = stochastic_gradient_descent(500, 700, 0, testData, testTarget, parameter)
+
+
+    X_test = np.linspace(0, len(losses), len(losses))
+    X_test1 = np.linspace(0, len(losses1), len(losses1))
+    X_test2 = np.linspace(0, len(losses2), len(losses2))
+
+    Y_test = np.linspace(0, len(acc), len(acc))
+    Y_test1 = np.linspace(0, len(acc1), len(acc1))
+    Y_test2 = np.linspace(0, len(acc2), len(acc2))
+
+    plt.figure(n)
+    plt.plot(X_test, losses, label='Training Data')
+    plt.plot(X_test1, losses1, label='Validation Data')
+    plt.plot(X_test2, losses2, label='Testing Data')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('SGD for '+parameter)
+
+    plt.legend()
+
+    plt.figure(n2)
+    plt.plot(Y_test, acc, label='Training Data')
+    plt.plot(Y_test1, acc1, label='Validation Data')
+    plt.plot(Y_test2, acc2, label='Testing Data')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('SGD for '+parameter)
+    plt.legend()
+
+
+    #losses, acc = stochastic_gradient_descent(500, 700, 0, validData, validTarget, "MSE")
+    #losses, acc = stochastic_gradient_descent(500, 700, 0, testData, testTarget, "MSE")
+mainSGD("MSE")
+mainSGD("CE",3,4)
+plt.show()
 
 
 
@@ -386,7 +444,7 @@ def main():
     plt.close('all')
 
 #############################LINEAR REGRESSION ###################################
-    '''
+
     #Tuning the Learning Rate Plot, Plot losses
     alpha = 0.005
     alpha1 = 0.001
@@ -446,7 +504,7 @@ def main():
 
     print('loss batched: ',loss_batched)
 
-    print('loss normal: ',loss)'''
+    print('loss normal: ',loss)
 
 ############################# LOGISTIC REGRESSION ###################################
     '''
@@ -516,7 +574,7 @@ def main():
     plt.plot(X_test6, acc2, label='alpha=0.0001')
     #plt.plot(X_test3, trainloss3, label='alpha=0.0001')
 
-    plt.legend()'''
+    plt.legend()
 
 
 
@@ -527,7 +585,7 @@ def main():
     W = np.zeros((trainData.shape[1] * trainData.shape[2]))
 
     b = np.zeros(1)
-    '''
+
     plt.figure(3)
     W, b, trainloss, acc = grad_descent(W, b, trainData, trainTarget, 0.005, iterations, 0, EPS, "MSE")
     print('MSE loss 1: ', trainloss[len(trainloss)-1])
@@ -537,7 +595,7 @@ def main():
 
     X_test = np.linspace(0, len(trainloss), len(trainloss))
 
-    plt.plot(X_test, trainloss, label='Linear Regression')'''
+    plt.plot(X_test, trainloss, label='Linear Regression')
 
     #Logistic Regression
     W, b, trainloss, acc = grad_descent(W, b, trainData, trainTarget, 0.005, iterations, 0, EPS, "CE")
@@ -545,7 +603,7 @@ def main():
     #Get accuracy for each
     accuracy = calculateAccuracy(W,b,x,y)
     print('accuracy 1: ',accuracy, '%')
-    '''
+
     X_test = np.linspace(0, len(trainloss), len(trainloss))
 
 
@@ -555,8 +613,8 @@ def main():
     plt.ylabel('Loss')
     plt.title('Linear Regression Vs. Logistic Regression losses')
 
-    plt.legend()
-    plt.show()'''
+    plt.legend()'''
+    plt.show()
 
 
 
