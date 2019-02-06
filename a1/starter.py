@@ -180,7 +180,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
     # create placeholders for x, y, reg, and alpha
     x = tf.placeholder(tf.float32, [784, None], name="data")
     y = tf.placeholder(tf.float32, [None, 1], name="labels")
-    #reg = tf.placeholder(tf.float32, name="reg")
+    reg = tf.placeholder(tf.float32, name="reg")
     #reg = tf.Variable(0, name="reg")
     learning_rate = tf.placeholder(tf.float32, name="learning_rate")
 
@@ -191,7 +191,7 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
     # calculate predicted y
     predicted_y = tf.matmul(tf.transpose(W), x) + b
     # calculate weight_decay_loss
-    #wd = (reg/2) * tf.reduce_sum(tf.square(W), name="weight_decay_loss")
+    wd = (reg/2) * tf.reduce_sum(tf.square(W), name="weight_decay_loss")
 
     total_loss = 0
     loss = 0
@@ -206,8 +206,8 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=predicted_y, name="cross_entropy_loss")
 
     # calculate total loss
-    #total_loss = loss + wd
-    total_loss = loss
+    total_loss = loss + wd
+    #total_loss = loss
 
     #training_op = optimizer.minimize(total_loss)
     #optimizer = tf.train.GradientDescentOptimizer(learning_rate, name="GradientDescent").minimize(total_loss)
@@ -268,20 +268,22 @@ def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, lossT
         # for each interation loop through all minibatches and run the session
         epochLoss = []
         a = []
+
         for i in range(epochs):
             for batch in batches:
                 X_batch = batch[0]
                 Y_batch = batch[1]
                 X_batch = np.transpose(X_batch)
                 _, W_new, b_new, yhat, tl = sess.run([adam_optimizer, W, b, predicted_y, total_loss],
-                feed_dict={x:X_batch, y:Y_batch, learning_rate:0.001})
-                epochLoss.append(total_loss.eval())
-                a.append(calculateAccuracy(W.eval(), b.eval(), d, l))
+                feed_dict={x:X_batch,reg:0, y:Y_batch, learning_rate:0.001})
+                epochLoss.append(total_loss)
+                #a.append(calculateAccuracy(W, b, d, l))
 
 
         #W, b, predicted_y, y, total_loss, optimizer, reg = buildGraph(epsilon=1e-08, lossType="CE", learning_rate=0.001)
-            acc.append(np.average(a))
-            losses.append(np.average(epochLoss))
+            #acc.append(tf.reduce_mean(a))
+            losses.append(tf.reduce_mean(epochLoss))
+            #batches=tf.train.shuffle_batch(batches)
 
     print("Final Error", losses[len(losses)-1])
     print("Final Accuracy", acc[len(acc)-1])
