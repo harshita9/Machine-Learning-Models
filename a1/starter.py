@@ -51,7 +51,7 @@ def gradMSE(W, b, x, y, reg):
     MSE = (yhat.flatten() - y.flatten() + b)
 
     # calculate gradient with respect to weights
-    gradMSE_weights = np.dot(MSE, np.transpose(x))
+    gradMSE_weights = 2 * np.dot(MSE, np.transpose(x))
     grad_weight_decay_loss = reg * W
     gradMSE_weights = np.transpose(gradMSE_weights / N) + grad_weight_decay_loss
 
@@ -72,12 +72,13 @@ def crossEntropyLoss(W, b, x, y, reg):
     yhat = 1 / (1 + np.exp(-1 * z))
 
     # get values of inner expressions
-    firstexpression = (np.dot(np.log(yhat), x.T))
-    firstexpression=-1 *y* firstexpression
-    #secondexpression = 1 - y
-    thirdexpression = np.log(1 - np.dot(x, yhat))
-    fourthexpression = firstexpression - (1-y) *thirdexpression
 
+    firstexpression=np.dot((np.log(yhat)),(-1*y))
+    te=(1-y)
+    secondexpression=np.log(1-yhat)
+    thirdexpression=np.dot(np.transpose(te),secondexpression)
+
+    fourthexpression=firstexpression.flatten()-thirdexpression.flatten()
     # calculate cross entropy loss
     crossEntropyLoss = (1 / N) * np.sum(fourthexpression)
     # calculate weight decay loss
@@ -100,9 +101,11 @@ def gradCE(W, b, x, y, reg):
 
         # calculate gradient with respect to weights
         grad_weight_decay_loss = reg * W
-        #gradCE_weight =(firstexpression + secondexpression)*x / N + grad_weight_decay_loss
-        gradCE_weight=np.dot(x,yhat.flatten()-y.flatten())
-        gradCE_weight=gradCE_weight+grad_weight_decay_loss
+
+        gradCE_weight=1/N*(np.dot(x,yhat.flatten()-y.flatten()))
+
+        gradCE_weight=gradCE_weight.flatten()+grad_weight_decay_loss.flatten()
+
         # calculate gradient with respect to biases
         gradCE_bias = np.sum(yhat.flatten() - y.flatten()) / N
 
@@ -158,8 +161,8 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
         new_b = b + alpha * bias_direction
         # weight error
         difference = np.linalg.norm(new_w - W) ** 2
-        # checking if new_w (new weight) is minimum
-        if(difference < EPS):
+        # checking if new_w (new weight) is minimum by checking the gradient
+        if(norm_weight_grad < EPS):
             # minimum/final weight array found
             break
         else:
@@ -315,7 +318,10 @@ def main():
 
 
     plt.close('all')
-    '''#Tuning the Learning Rate Plot, Plot losses
+
+#############################LINEAR REGRESSION ###################################
+    '''
+    #Tuning the Learning Rate Plot, Plot losses
     alpha = 0.005
     alpha1 = 0.001
     alpha2 = 0.0001
@@ -363,7 +369,7 @@ def main():
 
     #calculate normal equation
     startNormal=time.time()
-    W2=normalMSE(x,y,0)
+    W2=normalMSE(x,y,reg1)
     print('computation time Normal: ',time.time()-startNormal)
 
     loss=MSE(W2,0,x,y,reg1)
@@ -376,6 +382,8 @@ def main():
 
     print('loss normal: ',loss)'''
 
+############################# LOGISTIC REGRESSION ###################################
+
 
     #Tuning the Learning Rate Plot, Plot losses (logistic regression)
     reg = 0.1
@@ -384,8 +392,6 @@ def main():
     alpha2 = 0.0001
     print('Learning Rate')
 
-    #print('loss normal: ',loss)
-    #plt.show()
 
 
     #W3 = np.zeros(Data.shape[1] * Data.shape[2])
@@ -399,19 +405,19 @@ def main():
 
     #Get the optimized weight, bias and the loss
     W, b, trainloss, acc = grad_descent(W, b, trainData, trainTarget, alpha, iterations, reg, EPS, "CE")
-    print('CE loss 1: ', trainloss[len(trainloss)-1])
+    print('CE loss 1: ',crossEntropyLoss(W, b, x, y, reg))
     #Get accuracy for each
     accuracy = calculateAccuracy(W,b,x,y)
     print('accuracy 1: ',accuracy, '%')
 
     W, b, trainloss1, acc1 = grad_descent(W, b, trainData, trainTarget, alpha1, iterations, reg, EPS, "CE")
-    print('CE loss 2: ', trainloss1[len(trainloss1)-1])
+    print('CE loss 2: ', crossEntropyLoss(W, b, x, y, reg))
     #Get accuracy for each
     accuracy = calculateAccuracy(W,b,x,y)
     print('accuracy 2: ',accuracy, '%')
 
     W, b, trainloss2, acc2 = grad_descent(W, b, trainData, trainTarget, alpha2, iterations, reg, EPS, "CE")
-    print('CE loss 3: ', trainloss2[len(trainloss2)-1])
+    print('CE loss 3: ', crossEntropyLoss(W, b, x, y, reg))
     #Get accuracy for each
     accuracy = calculateAccuracy(W,b,x,y)
     print('accuracy 3: ',accuracy, '%')
@@ -427,9 +433,8 @@ def main():
     plt.figure(1)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Testing Loss with different alpha')
 
-    plt.title('CE loss for training')
+    plt.title('CE loss for training with different learning rate')
     plt.plot(X_test, trainloss, label='alpha=0.005')
     plt.plot(X_test3, trainloss1, label='alpha=0.001')
     plt.plot(X_test5, trainloss2, label='alpha=0.0001')
@@ -439,7 +444,7 @@ def main():
     plt.figure(2)
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.title('CE accuracy for training')
+    plt.title('CE accuracy for training with different learning rate')
     plt.plot(X_test2, acc, label='alpha=0.005')
     plt.plot(X_test3, acc1, label='alpha=0.001')
     plt.plot(X_test6, acc2, label='alpha=0.0001')
@@ -470,7 +475,7 @@ def main():
 
     #Logistic Regression
     W, b, trainloss, acc = grad_descent(W, b, trainData, trainTarget, 0.005, iterations, 0, EPS, "CE")
-    print('CE loss 1: ', trainloss[len(trainloss)-1])
+    print('CE loss 1: ', crossEntropyLoss(W, b, x, y, reg))
     #Get accuracy for each
     accuracy = calculateAccuracy(W,b,x,y)
     print('accuracy 1: ',accuracy, '%')
@@ -490,6 +495,8 @@ def main():
 
 
 main()
+
+#print(np.log(abs(-2))*0)
 
 '''W=np.array([[1],[2],[3]])
 x=np.array([[3,4,3],[1,2,2],[3,4,1]])
