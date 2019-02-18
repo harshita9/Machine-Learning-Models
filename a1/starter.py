@@ -484,9 +484,9 @@ def mainSGD(parameter,n=1,n2=2):
 
     #losses, acc = stochastic_gradient_descent(500, 700, 0, validData, validTarget, "MSE")
     #losses, acc = stochastic_gradient_descent(500, 700, 0, testData, testTarget, "MSE")
-mainSGD("MSE")
-mainSGD("CE",3,4)
-plt.show()
+#mainSGD("MSE")
+#mainSGD("CE",3,4)
+#plt.show()
 
 
 
