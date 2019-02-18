@@ -73,6 +73,7 @@ def crossEntropyLoss(W, b, x, y, reg):
     N = len(x)
 
     # get yhat (predicted y) using the sigmoid function
+
     z = np.dot(W.flatten(), x) + b
     yhat = 1 / (1 + np.exp(-1 * z))
 
@@ -368,6 +369,134 @@ def normalMSE(x,y,reg):
     inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
     w = np.dot(np.dot(inversexx,np.transpose(x)).T,y)
     return w
+
+def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, loss_Type):
+
+
+    W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate = buildGraph(lossType=loss_Type)
+
+    init = tf.global_variables_initializer()
+
+    d = data.reshape(data.shape[0], data.shape[1] * data.shape[2])
+    l = labels.reshape(len(labels),1)
+    #d = np.transpose(d)
+
+    # get the number of batches
+    num_batches = data.shape[0] / minibatch_size
+
+    # create minibatches of data and labels using minibatch_size
+    batches = []
+    for i in range(0, data.shape[0], minibatch_size):
+        X = d[i:i + minibatch_size]
+        Y = l[i:i + minibatch_size]
+        minibatch = (X, Y)
+        batches.append(minibatch)
+
+    losses = []
+    #W_new, b_new = 0, 0
+    acc = []
+    #d = np.transpose(d)
+    with tf.Session() as sess:
+        sess.run(init)
+        # SGD algorithm
+        # for each interation loop through all minibatches and run the session
+        #epochLoss = np.zeros(int(num_batches+2))
+        #a = np.zeros(int(num_batches+2))
+        losses = []
+        #W_new, b_new = 0, 0
+        acc = []
+        for i in range(0,epochs):
+            a=[]
+            epochLoss = []
+            #d = np.random.shuffle(d)
+            #l=l[d[:,0]]
+            ind_list = [m for m in range(len(l))]
+            shuffle(ind_list)
+            d  = d[ind_list, :]
+            l = l[ind_list,]
+            for j in range(0,data.shape[0],minibatch_size):
+                X_batch = d[j:j + minibatch_size]
+                Y_batch = l[j:j + minibatch_size]
+                #X_batch = batch[0]
+                #Y_batch = batch[1]
+                X_batch = np.transpose(X_batch)
+                _, W_new, b_new, yhat, tl = sess.run([adam_optimizer, W, b, predicted_y, total_loss],
+                feed_dict={x:X_batch,reg:0, y:Y_batch, learning_rate:0.001})
+
+
+                epochLoss.append(tl)
+                a.append(calculateAccuracy(W_new,b_new,(X_batch),Y_batch))
+
+
+
+
+            losses.append(np.mean(epochLoss))
+
+
+            acc.append(np.mean(a))
+
+
+
+    print("Final Error", losses[len(losses)-1])
+    print("Final Accuracy", acc[len(acc)-1])
+
+    return losses, acc
+
+
+
+def mainSGD(parameter,n=1,n2=2):
+    trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
+
+    losses, acc = stochastic_gradient_descent(500, 700, 0, trainData, trainTarget, parameter)
+    losses1, acc1 = stochastic_gradient_descent(500, 700, 0, validData, validTarget, parameter)
+    losses2, acc2 = stochastic_gradient_descent(500, 700, 0, testData, testTarget, parameter)
+
+
+    X_test = np.linspace(0, len(losses), len(losses))
+    X_test1 = np.linspace(0, len(losses1), len(losses1))
+    X_test2 = np.linspace(0, len(losses2), len(losses2))
+
+    Y_test = np.linspace(0, len(acc), len(acc))
+    Y_test1 = np.linspace(0, len(acc1), len(acc1))
+    Y_test2 = np.linspace(0, len(acc2), len(acc2))
+
+    plt.figure(n)
+    plt.plot(X_test, losses, label='Training Data')
+    plt.plot(X_test1, losses1, label='Validation Data')
+    plt.plot(X_test2, losses2, label='Testing Data')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('SGD for '+parameter)
+
+    plt.legend()
+
+    plt.figure(n2)
+    plt.plot(Y_test, acc, label='Training Data')
+    plt.plot(Y_test1, acc1, label='Validation Data')
+    plt.plot(Y_test2, acc2, label='Testing Data')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('SGD for '+parameter)
+    plt.legend()
+
+
+    #losses, acc = stochastic_gradient_descent(500, 700, 0, validData, validTarget, "MSE")
+    #losses, acc = stochastic_gradient_descent(500, 700, 0, testData, testTarget, "MSE")
+mainSGD("MSE")
+mainSGD("CE",3,4)
+plt.show()
+
+
+
+def normalMSE(x,y,reg):
+
+    inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
+    w=np.dot(np.dot(inversexx,np.transpose(x)).T,y)
+    return w
+
+
 
 
 def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter, lossType):
