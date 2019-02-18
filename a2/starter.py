@@ -44,19 +44,59 @@ def shuffle(trainData, trainTarget):
 
 
 def relu(x):
-    # TODO
-#
+    return np.maximum(x,0)
+
 def softmax(x):
-    # TODO
+    sume=np.sum(np.exp(x),axis=0)
+
+    return np.exp(x)/sume
+
 
 
 def computeLayer(X, W, b):
-    # TODO
+
+    return np.dot(np.transpose(W),X)+b
 
 def CE(target, prediction):
+    # total cross entropy loss
+    cross_entropy_loss = 0
 
-    # TODO
+    yhat=prediction
+    y=target
+
+    N = len(target)
+    K=(target.shape[1])
+
+    # get yhat (predicted y) using the sigmoid function
+
+    z=softmax(yhat)
+
+    innerloop=
+
+
+    # calculate total cross entropy loss
+    cross_entropy_loss = crossEntropyLoss
+
+    return cross_entropy_loss
+
 
 def gradCE(target, prediction):
+    pass
+
+
+trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
+newtrain, newvalid, newtest= convertOneHot(trainTarget, validTarget, testTarget)
+x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
+#x=np.transpose(x)
+print(x.shape)
+print(x.shape)
+print(softmax(x).shape)
+W=np.arange(len(trainData))
+#W=np.transpose(W)
+b=1
+prediction=computeLayer(x,W,b)
+print(CE(newtrain,prediction))
+
+
 
     # TODO
