@@ -4,6 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
 
+'''Assignment 1 by
+    Suyasha Acharya (1003083511)
+    Sai Harshita Tupili (1002938556)'''
+
 def loadData():
     with np.load('notMNIST.npz') as data :
         Data, Target = data ['images'], data['labels']
@@ -67,15 +71,14 @@ def crossEntropyLoss(W, b, x, y, reg):
     cross_entropy_loss = 0
 
     N = len(x)
-    # get yhat (predicted y) using the sigmoid function
 
+    # get yhat (predicted y) using the sigmoid function
     z = np.dot(W.flatten(), x) + b
     yhat = 1 / (1 + np.exp(-1 * z))
 
     # get values of inner expressions
-
     firstexpression=np.dot((np.log(yhat)),(-1*y))
-    te=(1-y)
+    te = (1-y)
     secondexpression=np.log(1-yhat)
     thirdexpression=np.dot(np.transpose(te),secondexpression)
 
@@ -103,9 +106,9 @@ def gradCE(W, b, x, y, reg):
         # calculate gradient with respect to weights
         grad_weight_decay_loss = reg * W
 
-        gradCE_weight=1/N*(np.dot(x,yhat.flatten()-y.flatten()))
+        gradCE_weight = 1/N*(np.dot(x,yhat.flatten()-y.flatten()))
 
-        gradCE_weight=gradCE_weight.flatten()+grad_weight_decay_loss.flatten()
+        gradCE_weight = gradCE_weight.flatten()+grad_weight_decay_loss.flatten()
 
         # calculate gradient with respect to biases
         gradCE_bias = np.sum(yhat.flatten() - y.flatten()) / N
@@ -170,22 +173,19 @@ def grad_descent(W, b, trainingData, trainingLabels, alpha, iterations, reg, EPS
             W = new_w
             b = new_b
 
-
-
     return W,b,train_loss,accuracy
 
 def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rate=None):
+    '''Build computational graph for SGD.'''
     #Initialize weight and bias tensors
     W = tf.Variable(tf.truncated_normal(shape = (1,784), stddev = 0.5, dtype = tf.float32, name="weights"))
     b = tf.Variable(tf.zeros(1), name="biases")
+
     # create placeholders for x, y, reg, and alpha
     x = tf.placeholder(tf.float32, [784, None], name="data")
     y = tf.placeholder(tf.float32, [None, 1], name="labels")
     reg = tf.placeholder(tf.float32, name="reg")
-    #reg = tf.Variable(0, name="reg")
     learning_rate = tf.placeholder(tf.float32, name="learning_rate")
-
-    #x = tf.transpose(x)
 
     tf.set_random_seed(421)
 
@@ -196,12 +196,11 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     total_loss = 0
     loss = 0
+
     # calculate loss based on loss type
     if lossType == "MSE":
-        #error = predicted_y - y
-        #mse = (1/2) * tf.reduce_mean(tf.square(error), name="mse")
         loss = tf.losses.mean_squared_error(labels=y, predictions=predicted_y)
-        loss=1/2*(loss)
+        loss = 1/2*(loss)
 
     elif lossType == "CE":
         yhat = tf.sigmoid(predicted_y)
@@ -209,28 +208,27 @@ def buildGraph(beta1=None, beta2=None, epsilon=None, lossType=None, learning_rat
 
     # calculate total loss
     total_loss = loss + wd
-    #total_loss = loss
 
-    #training_op = optimizer.minimize(total_loss)
-    #optimizer = tf.train.GradientDescentOptimizer(learning_rate, name="GradientDescent").minimize(total_loss)
-    adam_optimizer = tf.train.AdamOptimizer(learning_rate, name="Adam").minimize(total_loss)
+    # use adam optimizer for the given hyperparameters
+    if beta1:
+        adam_optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, beta1=beta1, name="Adam").minimize(total_loss)
+    elif beta2:
+        adam_optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, beta2=beta2, name="Adam").minimize(total_loss)
+    elif epsilon:
+        adam_optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, epsilon=epsilon, name="Adam").minimize(total_loss)
+    else:
+        adam_optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate, name="Adam").minimize(total_loss)
 
     return W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate
 
-'''def get_batches(x, y, batch_size):
-    for i in range(0, x.shape[0], batch_size):
-        X = x[i:i + batch_size]
-        Y = y[i:i + batch_size]
-        yield (X, Y)'''
-
 def calculateAccuracy(W,b,x,y):
-
-    yhat=np.dot(W.flatten(),x)+ b
-    yhat=yhat.flatten()
-    y=y.flatten()
+    '''Calculates accuracy of the predicted labels using given weights and biases.'''
+    yhat = np.dot(W.flatten(),x) + b
+    yhat = yhat.flatten()
+    y = y.flatten()
 
     #number of accurate data classified
-    correct=0
+    correct = 0
 
     for i in range(0,len(y)):
         if((yhat[i]<0 and y[i]==0) or (yhat[i]>=0 and y[i]==1)):
@@ -238,88 +236,68 @@ def calculateAccuracy(W,b,x,y):
 
     return float(correct/len(y))*100
 
+def stochastic_gradient_descent(minibatch_size, epochs, lamda, data, labels, loss_type, alpha, b1 = None, b2 = None, e = None):
 
-def stochastic_gradient_descent(minibatch_size, epochs, reg, data, labels, loss_Type):
+    ''' Uses adam optimizer and the stochastic gradient descent algorithm
+    to compute optimal losses. '''
 
-
-    W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate = buildGraph(lossType=loss_Type)
-
+    # build computaional graph and initialize variables
+    W, b, predicted_y, x, y, total_loss, adam_optimizer, reg, learning_rate = buildGraph(lossType = loss_type, beta1 = b1, beta2 = b2, epsilon = e)
     init = tf.global_variables_initializer()
 
+    # reshape data
     d = data.reshape(data.shape[0], data.shape[1] * data.shape[2])
     l = labels.reshape(len(labels),1)
-    #d = np.transpose(d)
 
     # get the number of batches
     num_batches = data.shape[0] / minibatch_size
 
-    # create minibatches of data and labels using minibatch_size
-    batches = []
-    for i in range(0, data.shape[0], minibatch_size):
-        X = d[i:i + minibatch_size]
-        Y = l[i:i + minibatch_size]
-        minibatch = (X, Y)
-        batches.append(minibatch)
-
     losses = []
-    #W_new, b_new = 0, 0
     acc = []
-    #d = np.transpose(d)
+    # start tensor flow session
     with tf.Session() as sess:
         sess.run(init)
         # SGD algorithm
         # for each interation loop through all minibatches and run the session
-        #epochLoss = np.zeros(int(num_batches+2))
-        #a = np.zeros(int(num_batches+2))
         losses = []
-        #W_new, b_new = 0, 0
         acc = []
-        for i in range(0,epochs):
-            a=[]
+        for i in range(epochs):
+            a = []
             epochLoss = []
-            #d = np.random.shuffle(d)
-            #l=l[d[:,0]]
-            ind_list = [m for m in range(len(l))]
-            shuffle(ind_list)
-            d  = d[ind_list, :]
-            l = l[ind_list,]
+            # shuffle data and labels
+            index_shuffle = [m for m in range(len(l))]
+            shuffle(index_shuffle)
+            d  = d[index_shuffle, :]
+            l = l[index_shuffle,]
             for j in range(0,data.shape[0],minibatch_size):
+                # get minibatch and run session
                 X_batch = d[j:j + minibatch_size]
                 Y_batch = l[j:j + minibatch_size]
-                #X_batch = batch[0]
-                #Y_batch = batch[1]
                 X_batch = np.transpose(X_batch)
-                _, W_new, b_new, yhat, tl = sess.run([adam_optimizer, W, b, predicted_y, total_loss],
-                feed_dict={x:X_batch,reg:0, y:Y_batch, learning_rate:0.001})
-
-
+                _, W_new, b_new, tl = sess.run([adam_optimizer, W, b, total_loss],
+                feed_dict={x:X_batch,reg:lamda, y:Y_batch, learning_rate:alpha})
+                # add loss and acuuracy for each batch
                 epochLoss.append(tl)
-                a.append(calculateAccuracy(W_new,b_new,(X_batch),Y_batch))
-
-
-
-
+                a.append(calculateAccuracy(W_new,b_new,X_batch,Y_batch))
+            # get average loss per iteration
             losses.append(np.mean(epochLoss))
-
-
             acc.append(np.mean(a))
 
+    #import pdb; pdb.set_trace() # for debugging
 
-
-    print("Final Error", losses[len(losses)-1])
-    print("Final Accuracy", acc[len(acc)-1])
+    # print final error and accuracy
+    print("The final error is ", losses[len(losses)-1])
+    print("The final accuracy is ", acc[len(acc)-1])
 
     return losses, acc
 
-
-
 def mainSGD(parameter,n=1,n2=2):
+    '''Plotting graphs for part 3'''
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
-
-    losses, acc = stochastic_gradient_descent(500, 700, 0, trainData, trainTarget, parameter)
-    losses1, acc1 = stochastic_gradient_descent(500, 700, 0, validData, validTarget, parameter)
-    losses2, acc2 = stochastic_gradient_descent(500, 700, 0, testData, testTarget, parameter)
-
+    alpha = 0.001
+    losses, acc = stochastic_gradient_descent(100, 700, 0, trainData, trainTarget, parameter, alpha)
+    losses1, acc1 = stochastic_gradient_descent(700, 700, 0, trainData, trainTarget, parameter, alpha)
+    losses2, acc2 = stochastic_gradient_descent(1750, 700, 0, trainData, trainTarget, parameter, alpha)
 
     X_test = np.linspace(0, len(losses), len(losses))
     X_test1 = np.linspace(0, len(losses1), len(losses1))
@@ -330,45 +308,69 @@ def mainSGD(parameter,n=1,n2=2):
     Y_test2 = np.linspace(0, len(acc2), len(acc2))
 
     plt.figure(n)
-    plt.plot(X_test, losses, label='Training Data')
-    plt.plot(X_test1, losses1, label='Validation Data')
-    plt.plot(X_test2, losses2, label='Testing Data')
+    plt.plot(X_test, losses, label='Batch=100')
+    plt.plot(X_test1, losses1, label='Batch=700')
+    plt.plot(X_test2, losses2, label='Batch=1750')
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('SGD for '+parameter)
+    plt.title('SGD using Training Data for '+parameter)
 
     plt.legend()
 
     plt.figure(n2)
-    plt.plot(Y_test, acc, label='Training Data')
-    plt.plot(Y_test1, acc1, label='Validation Data')
-    plt.plot(Y_test2, acc2, label='Testing Data')
+    plt.plot(Y_test, acc, label='Batch=100')
+    plt.plot(Y_test1, acc1, label='Batch=700')
+    plt.plot(Y_test2, acc2, label='Batch=1750')
 
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.title('SGD for '+parameter)
+    plt.title('SGD using Training Data for '+parameter)
     plt.legend()
 
+def hyperparameters(data, labels):
+    '''Hyperparameters investigation for part 3'''
+    alpha=0.001
+    print ("MSE")
+    print ("beta1 = 0.95")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, b1 = 0.95)
+    print ("beta1 = 0.99")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, b1 = 0.99)
+    print ("beta2 = 0.99")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, b2 = 0.99)
+    print ("beta2 = 0.9999")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, b2 = 0.9999)
+    print ("epsilon = 1e-09")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, e = 1e-09)
+    print ("epsilon = 1e-4")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "MSE",alpha=alpha, e = 1e-4)
 
-    #losses, acc = stochastic_gradient_descent(500, 700, 0, validData, validTarget, "MSE")
-    #losses, acc = stochastic_gradient_descent(500, 700, 0, testData, testTarget, "MSE")
-mainSGD("MSE")
-mainSGD("CE",3,4)
-plt.show()
+    print ("CE")
+    print ("beta1 = 0.95")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, b1 = 0.95)
+    print ("beta1 = 0.99")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, b1 = 0.99)
+    print ("beta2 = 0.99")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, b2 = 0.99)
+    print ("beta2 = 0.9999")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, b2 = 0.9999)
+    print ("epsilon = 1e-09")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, e = 1e-09)
+    print ("epsilon = 1e-4")
+    losses, acc = stochastic_gradient_descent(500, 700, 0, data, labels, "CE", alpha=alpha, e = 1e-4)
 
+    return
 
 
 def normalMSE(x,y,reg):
-
+    '''Normal MSE equation for linear regression'''
     inversexx = np.linalg.inv(np.dot(np.transpose(x),x)+reg*np.identity(x.shape[1]))
-    w=np.dot(np.dot(inversexx,np.transpose(x)).T,y)
+    w = np.dot(np.dot(inversexx,np.transpose(x)).T,y)
     return w
 
 
-
-
 def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,reg3,EPS,parameter, lossType):
+    '''Plots for linear regression'''
     #initialize W and bias
     W = np.zeros(Data.shape[1] * Data.shape[2])
     W1 = np.zeros(Data.shape[1] * Data.shape[2])
@@ -425,9 +427,8 @@ def plotlinearRegression(Data, Target,alpha,alpha1,alpha2,iterations,reg1,reg2,r
     plt.legend()
     return
 
-
-#if __name__ == "__main__":
-def main():
+def Part1and2():
+    '''Main function for part one and two (linear and logistic regression)'''
     trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
     W = np.zeros(trainData.shape[1] * trainData.shape[2])
@@ -507,7 +508,6 @@ def main():
     print('loss normal: ',loss)
 
 ############################# LOGISTIC REGRESSION ###################################
-    '''
 
     #Tuning the Learning Rate Plot, Plot losses (logistic regression)
     reg = 0.1
@@ -613,20 +613,21 @@ def main():
     plt.ylabel('Loss')
     plt.title('Linear Regression Vs. Logistic Regression losses')
 
-    plt.legend()'''
+    plt.legend()
     plt.show()
 
 
+#trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
-#main()
+# For part one and two call commented function below
+#Part1and2()
 
-#print(np.log(abs(-2))*0)
-
-'''W=np.array([[1],[2],[3]])
-x=np.array([[3,4,3],[1,2,2],[3,4,1]])
-y=np.array([[3],[4],[5]])
-b=np.array([[1]])
-reg=3
-print(MSE(W,b,x,y,reg))
-print(gradMSE(W,b,x,y,reg))
-print(crossEntropyLoss(W, b, x, y, reg))'''
+# For part 3 call commented functions below
+#print("train")
+#hyperparameters(trainData, trainTarget)
+#print("valid")
+#hyperparameters(validData, validTarget)
+#print("test")
+#hyperparameters(testData, testTarget)
+#mainSGD("MSE")
+#mainSGD("CE", 3, 4) # 3 and 4 are figure numbers for plotting
