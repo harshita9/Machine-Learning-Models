@@ -47,7 +47,7 @@ def relu(x):
     return np.maximum(x,0)
 
 def softmax(x):
-    sume=np.sum(np.exp(x),axis=0)
+    sume=np.sum(np.exp(x))
 
     return np.exp(x)/sume
 
@@ -64,38 +64,58 @@ def CE(target, prediction):
     yhat=prediction
     y=target
 
-    N = len(target)
+    N = (target.shape[0])
     K=(target.shape[1])
 
-    # get yhat (predicted y) using the sigmoid function
+    # get z using the sigmax function
 
     z=softmax(yhat)
-
-    innerloop=
+    innerloop=np.dot(y,np.log(z))
 
 
     # calculate total cross entropy loss
-    cross_entropy_loss = crossEntropyLoss
+    cross_entropy_loss = np.sum(innerloop)/(-1*N)
 
     return cross_entropy_loss
 
 
 def gradCE(target, prediction):
-    pass
+
+    yhat=prediction
+    y=target
+    N = (target.shape[0])
+    z=softmax(yhat)
+
+    #return (-1/N)*np.true_divide(np.transpose(y),z)
+    return (-1/N)*(np.transpose(y)/z)
+
+def outergradCE(target,prediction,x):
+    yhat=prediction
+    y=target
+    N = (target.shape[0])
+    z=softmax(yhat)
+    gradb= (z-np.transpose(y))
+    return np.dot(gradb,np.transpose(x)),np.sum(gradb,axis=1)
+
 
 
 trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
 newtrain, newvalid, newtest= convertOneHot(trainTarget, validTarget, testTarget)
 x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
-#x=np.transpose(x)
+
 print(x.shape)
 print(x.shape)
 print(softmax(x).shape)
-W=np.arange(len(trainData))
+deviation=np.sqrt(2/(x.shape[1]+newtrain.shape[1]))
+W=np.random.normal(0,deviation, size=(x.shape[1],newtrain.shape[1]))
 #W=np.transpose(W)
 b=1
+x=np.transpose(x)
 prediction=computeLayer(x,W,b)
-print(CE(newtrain,prediction))
+#print(prediction)
+#print(CE(newtrain,prediction))
+wg,bg=outergradCE(newtrain,prediction,x)
+print(wg.shape,bg.shape)
 
 
 
