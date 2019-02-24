@@ -47,19 +47,15 @@ def relu(x):
     return np.maximum(x,0)
 
 def softmax(x):
-    sume=np.sum(np.exp(x),axis=0)
-
-    return np.exp(x)/sume
-
-
+    sumexp = np.sum(np.exp(x)) # axis = 0 or 1?
+    return np.exp(x)/sumexp
 
 def computeLayer(X, W, b):
-
     return np.dot(np.transpose(W),X)+b
 
 def CE(target, prediction):
-    # total cross entropy loss
-    cross_entropy_loss = 0
+    # average cross entropy loss
+    ce = 0
 
     yhat=prediction
     y=target
@@ -67,24 +63,16 @@ def CE(target, prediction):
     N = len(target)
     K=(target.shape[1])
 
-    # get yhat (predicted y) using the sigmoid function
+    z=softmax(y)
 
-    z=softmax(yhat)
-
-    innerloop=
-
-
-    # calculate total cross entropy loss
-    cross_entropy_loss = crossEntropyLoss
-
-    return cross_entropy_loss
+    return ce
 
 
 def gradCE(target, prediction):
     pass
 
 
-trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
+'''trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
 newtrain, newvalid, newtest= convertOneHot(trainTarget, validTarget, testTarget)
 x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
 #x=np.transpose(x)
@@ -95,8 +83,4 @@ W=np.arange(len(trainData))
 #W=np.transpose(W)
 b=1
 prediction=computeLayer(x,W,b)
-print(CE(newtrain,prediction))
-
-
-
-    # TODO
+print(CE(newtrain,prediction))'''
