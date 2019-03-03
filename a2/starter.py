@@ -61,7 +61,6 @@ def softmaxDerivative(s2,x1):
 
 
 def computeLayer(X, W, b):
-
     return np.dot(np.transpose(W),X)+b
 
 def CE(target, prediction):
