@@ -210,6 +210,8 @@ def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
 
     return W1,W2,b1,b2,train_loss,accuracy
 
+
+
 '''
 trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
 newtrain, newvalid, newtest= convertOneHot(trainTarget, validTarget, testTarget)
