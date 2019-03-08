@@ -56,8 +56,18 @@ def softmax(x):
 
     return np.exp(x)/sume
 
-def softmaxDerivative(s2,x1):
-    pass
+def softmaxDerivative(x2,K,C):
+    softmaxder=np.zeros(shape=x2.shape)
+
+    for n in range(len(x2)):
+        for i in range(K):
+            for j in range(C):
+                if i==j:
+                    softmaxder[n][i]=x2[n][j] *(1-x2[n][j])
+                else:
+                    softmaxder[n][i]=-1*x2[n][j] * x2[n][j]
+
+    return softmaxder
 
 
 def computeLayer(X, W, b):
@@ -90,12 +100,12 @@ def gradCE(target, prediction): #check
     #get the gradient of error with respect to s
     return (-1/N)*(np.transpose(y)/yhat)
 
-def outergradCE(target,x2,x1,s2):
+def outergradCE(target,x2,x1,s2,K,C):
     N = (target.shape[0])
     #get the gradient with respect to s
     gradS=gradCE(target,x2)
     #get the outer layer gradient
-    gradsoftmax=softmaxDerivative(s2,x1)
+    gradsoftmax=softmaxDerivative(x2,K,C)
     #get the delta for outer layer
     deltaouter=np.dot(gradS,gradsoftmax)
     #get the gradient with respect to outer weights
@@ -120,7 +130,7 @@ def innergradCE(x, deltaouter,w2,s1):
 
 def forwardPropogation(x,w1,w2,b1,b2,y):
     #compute first layer prediction
-    s1=computeLayer(x,w1,b1)
+    s1=computeLayer(x.T,w1,b1)
     #use the activation function
     x1=relu(s1)
 
@@ -135,9 +145,9 @@ def forwardPropogation(x,w1,w2,b1,b2,y):
     return s1,x1,s2,prediction,CEloss
 
 
-def backPropogation(x,x1,x2,w1,w2,s1,s2,y):
+def backPropogation(x,x1,x2,w1,w2,s1,s2,y,K,C):
     #outer gradients
-    deltaouter,gradWouter,gradBouter=outergradCE(y,x2,x1,s2)
+    deltaouter,gradWouter,gradBouter=outergradCE(y,x2,x1,s2,K,C)
     #inner gradients
     gradwinner,gradb=innergradCE(x, deltaouter,w2,s1)
 
@@ -149,13 +159,13 @@ def calculateAccuracy(prediction,y):
     count=0
     N=len(predictedclasses)
     for i in range(N):
-        if prediction[predictedclasses[i]]!=0:
+        if prediction[i][predictedclasses[i]]!=0:
             count+=1
 
     return count/N * 100
 
 
-def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
+def GD(trainingData, trainingLabels, alpha, iterations, gamma,K):
 
     # reshape x to be a 2D array (number of samples x 784)
     x = x=trainingData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
@@ -166,7 +176,7 @@ def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
     deviation2=np.sqrt(2/(trainingLabels.shape[1]+K))
     #initialize W vectors
     W1=np.random.normal(0,deviation1, size=(x.shape[1],K))
-    W1=np.random.normal(0,deviation2, size=(K,trainingLabels.shape[1]))
+    W2=np.random.normal(0,deviation2, size=(K,trainingLabels.shape[1]))
     #initialize V vectors
     V1=np.ones((x.shape[1],K))
     V2=np.ones((K,trainingLabels.shape[1]))
@@ -182,6 +192,8 @@ def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
     train_loss = []
     accuracy = []
 
+    C=trainingLabels.shape[1]
+
     for i in range(iterations):
         #do forward pass
         s1,x1,s2,prediction,loss=forwardPropogation(x,W1,W2,b1,b2,y)
@@ -194,7 +206,11 @@ def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
 
 
         #Back back Propogation
-        gradWouter,gradBouter,gradwinner,gradbinner=backPropogation(x,x1,x2,w1,w2,s1,s2,y)
+        gradWouter,gradBouter,gradwinner,gradbinner=backPropogation(x,x1,prediction,W1,W2,s1,s2,y,K,C)
+        print("grad outer W", gradWouter.shape)
+        print("grad outer b", gradBouter.shape)
+        print("grad inner W", gradwinner.shape)
+        print("grad inner b", gradbinner.shape)
         #update value for inner weights
         V1=gamma*V1+(alpha*gradWinner)
         W1=W1-V1
@@ -207,35 +223,17 @@ def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
         b1=b1-alpha*gradbinner
         b2=b2-alpha*gradBouter
 
-
+    print("Final Loss: ", train_loss[len(train_loss)-1])
+    print("Final Accuracy: ",accuracy[len(accuracy)-1],"%")
     return W1,W2,b1,b2,train_loss,accuracy
 
-'''
+
 trainData, validData, testData, trainTarget, validTarget, testTarget=loadData()
 newtrain, newvalid, newtest= convertOneHot(trainTarget, validTarget, testTarget)
 x=trainData.reshape(trainData.shape[0],(trainData.shape[1]*trainData.shape[2]))
-
-print(x.shape)
-print(x.shape)
-print(softmax(x).shape)
-deviation=np.sqrt(2/(x.shape[1]+newtrain.shape[1]))
-W=np.random.normal(0,deviation, size=(x.shape[1],newtrain.shape[1]))
-#W=np.transpose(W)
-b=1
-x=np.transpose(x)
-prediction=computeLayer(x,W,b)
-print(prediction.shape)
-#print(prediction)
-#print(CE(newtrain,prediction))
-wg,bg=outergradCE(newtrain,prediction,x)
-print(wg.shape,bg.shape)'''
-
-x=np.array([[0, 3, 3, 2],
-       [4, 1, 1, 2],
-       [3, 4, 2, 4],
-       [2, 4, 3, 0],
-       [1, 2, 3, 4]])
-print(reluDerivative(x))
-
-
+iterations=200
+gamma=0.99
+K=1000
+alpha=0.01
+GD(trainData, newtrain, alpha, iterations, gamma,K)
     # TODO
