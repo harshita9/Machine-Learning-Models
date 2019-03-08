@@ -81,7 +81,7 @@ def CE(target, prediction):
     return cross_entropy_loss
 
 
-def gradCE(target, prediction):
+def gradCE(target, prediction): #check
 
     yhat=prediction
     y=target
