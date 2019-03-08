@@ -47,16 +47,13 @@ def relu(x):
     return np.maximum(x,0)
 
 def softmax(x):
-    sume=np.sum(np.exp(x))
-
+    sume = np.sum(np.exp(x)) # axis? #will have many data points
     return np.exp(x)/sume
 
+def computeLayer(X, W, b): #check
+    return np.dot(np.transpose(W),X) + b
 
-
-def computeLayer(X, W, b):
-    return np.dot(np.transpose(W),X)+b
-
-def CE(target, prediction):
+def CE(target, prediction): #check
     # average cross entropy loss
     ce = 0
 
@@ -78,7 +75,7 @@ def CE(target, prediction):
     return cross_entropy_loss
 
 
-def gradCE(target, prediction):
+def gradCE(target, prediction): #check
 
     yhat=prediction
     y=target
@@ -110,12 +107,8 @@ W=np.random.normal(0,deviation, size=(x.shape[1],newtrain.shape[1]))
 #W=np.transpose(W)
 b=1
 x=np.transpose(x)
-prediction=computeLayer(x,W,b)
+prediction=computeLayer(x,W,b) '''
 #print(prediction)
 #print(CE(newtrain,prediction))
 wg,bg=outergradCE(newtrain,prediction,x)
 print(wg.shape,bg.shape)
-
-
-
-    # TODO
