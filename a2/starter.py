@@ -144,7 +144,16 @@ def backPropogation(x,x1,x2,w1,w2,s1,s2,y):
     return gradWouter,gradBouter,gradwinner,gradb
 
 def calculateAccuracy(prediction,y):
-    pass
+
+    predictedclasses=np.argmax(prediction,axis=1)
+    count=0
+    N=len(predictedclasses)
+    for i in range(N):
+        if prediction[predictedclasses[i]]!=0:
+            count+=1
+
+    return count/N * 100
+
 
 def GD(trainingData, trainingLabels, alpha, iterations, gamma, EPS,K):
 
