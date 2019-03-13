@@ -616,7 +616,27 @@ def Part1and2():
     plt.legend()
     plt.show()
 
+def softmaxDerivative(x2,C,s2,y):
+    softmaxder=np.zeros(shape=x2.shape)
+    #return x2*(1-x2)
+    N=x2.shape[1]
+    '''for n in range(x2.shape[1]):
+        for i in range(C):
+            for j in range(C):
+                if i==j:
+                    softmaxder[i,n]=x2[j,n] *(1.0-x2[j,n])
+                else:
+                    softmaxder[j,n]=-1.0*x2[i,n] * x2[j,n]'''
 
+    for i in range(x2.shape[1]):
+        for j in range(C):
+
+            if j==np.argmax(y[i]):
+                softmaxder[j,i]=x2[j,i]*(1-x2[j,i])
+            else:
+                softmaxder[j,i]= -1*x2[j,i] *x2[np.argmax(y[i]),i]
+
+    return softmaxder
 #trainData, validData, testData, trainTarget, validTarget, testTarget = loadData()
 
 # For part one and two call commented function below
