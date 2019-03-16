@@ -171,7 +171,7 @@ def GD(trainingData, trainingLabels,ValidatinData,ValidationLabels,TestingData,T
     #initialize W vectors
     W1=np.random.normal(0,deviation1, size=(x.shape[0],K))
     W2=np.random.normal(0,deviation2, size=(K,trainingLabels.shape[1]))
-    #W2=np.random.normal(0,deviation2, size=(x.shape[1],trainingLabels.shape[0]))
+
     #initialize V vectors
     V1=np.ones((x.shape[0],K))
     V2=np.ones((K,trainingLabels.shape[1]))
@@ -263,9 +263,7 @@ def GD(trainingData, trainingLabels,ValidatinData,ValidationLabels,TestingData,T
     train_loss.append(loss)
     valid_loss.append(loss2)
     test_loss.append(loss3)
-    #print(train_loss)
-    #print("****************************")
-    #print(accuracy)
+
     print("Final train Loss: ", train_loss[len(train_loss)-1])
     print("Final Train Accuracy: ",train_accuracy[len(train_accuracy)-1],"%")
 
@@ -375,8 +373,7 @@ def calculateAccuracy(prediction,y):
 
     p=np.argmax(prediction,axis=1)
     t=np.argmax(y,axis=1)
-    #print(predictedclasses.shape)
-    #print(predictedclasses)
+
     count=0.0
     N=len(p)
     for i in range(N):
