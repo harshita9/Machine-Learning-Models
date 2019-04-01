@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import helper as hlp
 
 # Loading data
-data = np.load('data2D.npy')
-#data = np.load('data100D.npy')
+#data = np.load('data2D.npy')
+data = np.load('data100D.npy')
 [num_pts, dim] = np.shape(data)
 
 def getVal(data):
@@ -142,16 +142,16 @@ def stochastic_gradient_descent(epochs, alpha,K,D,trainData,ValidData=None,isVal
     acc = calculateAccuracy(predic, K)
     # print final error and accuracy
     print("The final training Loss is ", trainLoss[len(trainLoss)-1])
-    print("The percentage of the training data belonging to each of K clusters is: ")
-    printKNum(acc)
+    #print("The percentage of the training data belonging to each of K clusters is: ")
+    #printKNum(acc)
 
 
 
     if isValid != False:
         print("The final validation error is ", validLoss[len(validLoss)-1])
-        acc2 = calculateAccuracy(predic2, K)
-        print("The percentage of the validation data belonging to each of K clusters is: ")
-        printKNum(acc2)
+        #acc2 = calculateAccuracy(predic2, K)
+        #print("The percentage of the validation data belonging to each of K clusters is: ")
+        #printKNum(acc2)
 
 
 
@@ -324,4 +324,101 @@ def mainPart1():
 
 
 
-mainPart1()
+#mainPart1()
+
+
+def mainPart2():
+
+    ''' Running 100D data for part 2'''
+
+    plt.close('all')
+
+    vali_data, train_data=getVal(data)
+
+
+    K1=5
+    K2=10
+    K3=15
+    K4=20
+    K5=30
+    learning_rate=0.1
+    epochs=3500
+    D=dim
+
+    print("Total K=5")
+    trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K1,D,train_data,ValidData=vali_data,isValid= True)
+
+
+    print("Total K=10")
+    #plt.figure(3)
+    trainLoss1, validLoss1,predic=stochastic_gradient_descent(epochs, learning_rate,K2,D,train_data,ValidData=vali_data,isValid= True)
+    #plotDataClusters(data,K2,predic)
+    #plt.title('Data classified to K=2')
+
+
+    print("Total K=15")
+    #plt.figure(4)
+    trainLoss2, validLoss2,predic=stochastic_gradient_descent(epochs, learning_rate,K3,D,train_data,ValidData=vali_data,isValid= True)
+    #plotDataClusters(data,K3,predic)
+    #plt.title('Data classified to K=3')
+
+    print("Total K=20")
+    #plt.figure(5)
+    trainLoss3, validLoss3,predic=stochastic_gradient_descent(epochs, learning_rate,K4,D,train_data,ValidData=vali_data,isValid= True)
+    #plotDataClusters(data,K4,predic)
+    #plt.title('Data classified to K=4')
+
+    #plt.figure(6)
+    print("Total K=30")
+    trainLoss4, validLoss4,predic=stochastic_gradient_descent(epochs, learning_rate,K5,D,train_data,ValidData=vali_data,isValid= True)
+    #plotDataClusters(data,K5,predic)
+    #plt.title('Data classified to K=5')
+
+
+    X_test1 = np.linspace(0, len(validLoss), len(validLoss))
+    X_test2 = np.linspace(0, len(validLoss1), len(validLoss1))
+    X_test3 = np.linspace(0, len(validLoss2), len(validLoss2))
+    X_test4 = np.linspace(0, len(validLoss3), len(validLoss3))
+    X_test5 = np.linspace(0, len(validLoss4), len(validLoss4))
+
+
+    plt.figure(8)
+    plt.plot(X_test1, validLoss, label="K=5")
+    plt.plot(X_test2, validLoss1, label="K=10")
+    plt.plot(X_test3, validLoss2, label="K=15")
+    plt.plot(X_test4, validLoss3, label="K=20")
+    plt.plot(X_test5, validLoss4, label="K=30")
+
+    plt.xlabel('Number of Updates')
+    plt.ylabel('Valid Loss')
+    plt.title('Validation Loss vs number of updates for different K')
+    plt.legend()
+
+
+
+
+    X_test1 = np.linspace(0, len(trainLoss), len(trainLoss))
+    X_test2 = np.linspace(0, len(trainLoss1), len(trainLoss1))
+    X_test3 = np.linspace(0, len(trainLoss2), len(trainLoss2))
+    X_test4 = np.linspace(0, len(trainLoss3), len(trainLoss3))
+    X_test5 = np.linspace(0, len(trainLoss4), len(trainLoss4))
+
+
+    plt.figure(9)
+    plt.plot(X_test1, trainLoss, label="K=5")
+    plt.plot(X_test2, trainLoss1, label="K=10")
+    plt.plot(X_test3, trainLoss2, label="K=15")
+    plt.plot(X_test4, trainLoss3, label="K=20")
+    plt.plot(X_test5, trainLoss4, label="K=30")
+
+    plt.xlabel('Number of Updates')
+    plt.ylabel('Test Loss')
+    plt.title('Test Loss vs number of updates for different K')
+    plt.legend()
+
+    plt.show()
+
+
+
+
+mainPart2()
