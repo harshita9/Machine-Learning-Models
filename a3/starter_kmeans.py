@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import helper as hlp
 
 # Loading data
-#data = np.load('data2D.npy')
-data = np.load('data100D.npy')
+data = np.load('data2D.npy')
+#data = np.load('data100D.npy')
 [num_pts, dim] = np.shape(data)
 
 def getVal(data):
@@ -29,7 +29,9 @@ def distanceFunc(X, MU):
     # Outputs
     # pair_dist: is the pairwise distance matrix (NxK)
     # TODO
+    #X(n)-MU(k)
     diff=tf.expand_dims(X,1)-tf.expand_dims(MU,0)
+    #get the square of the normal
     sq=(tf.linalg.norm(diff,axis=2))**2
 
     return sq
@@ -51,11 +53,11 @@ def model_implementation(K,alpha,D):
 
     tf.set_random_seed(421)
 
-    # create placeholders for x, y and alpha
+    # create placeholders for x, MU and alpha
     x = tf.placeholder(dtype=tf.float32, shape=[None, D])
     MU = tf.Variable(tf.random.normal(dtype=tf.float32, shape=[K, D], name = "MU"))
     learning_rate = tf.placeholder(tf.float32, name="learning_rate")
-
+    #get the loss and prediction
     total_loss,predicted=loss(x,MU)
 
 
@@ -65,11 +67,14 @@ def model_implementation(K,alpha,D):
     return predicted, x, MU, total_loss, adam_optimizer,learning_rate
 
 def calculateAccuracy(predic,K):
+    '''Calculate the percent of data in each K'''
+
     result=[]
     pr=list(predic)
 
     N=len(pr)
-
+    #for each K count the number of data in prediction that says it belongs to that
+    #particular K
     for i in range (0,K):
 
         num=pr.count(i)
@@ -79,6 +84,7 @@ def calculateAccuracy(predic,K):
     return result
 
 def printKNum(result):
+    '''Print the percent of data in each K'''
 
     for i in range(len(result)):
         print("K: ",i+1," ",result[i],"%")
@@ -109,7 +115,7 @@ def stochastic_gradient_descent(epochs, alpha,K,D,trainData,ValidData=None,isVal
     with tf.Session() as sess:
         sess.run(init)
         # SGD algorithm
-        # for each interation loop through all minibatches and run the session
+        # for each interation loop through all data and run the session
         for i in range(epochs):
 
             #run for train data
@@ -121,37 +127,38 @@ def stochastic_gradient_descent(epochs, alpha,K,D,trainData,ValidData=None,isVal
             # get loss per iteration
             err = total_loss.eval(feed_dict={x: trainData})
             err=err/N
-            #print(err)
-            #acc = calculateAccuracy(predicted_y.eval(feed_dict={x: d}), l)
+
+
             trainLoss.append(err)
-            #trainAcc.append(acc)
+            #for valid data get the loss
             if isValid != False:
                 N2=(ValidData.shape)[0]
+                #get the loss
                 err = total_loss.eval(feed_dict={x: ValidData})
                 err=err/N2
-                #acc = calculateAccuracy(predicted_y.eval(feed_dict={x: valid_d}), valid_l)
+
                 validLoss.append(err)
-                #validAcc.append(acc)
+        #Get the prediction for training and validation data
         predic=predicted.eval(feed_dict={x: trainData})
         if isValid != False:
             predic2=predicted.eval(feed_dict={x: ValidData})
 
 
 
-
+    #calculate percente of data in each clusters
     acc = calculateAccuracy(predic, K)
     # print final error and accuracy
     print("The final training Loss is ", trainLoss[len(trainLoss)-1])
-    #print("The percentage of the training data belonging to each of K clusters is: ")
-    #printKNum(acc)
+    print("The percentage of the training data belonging to each of K clusters is: ")
+    printKNum(acc)
 
 
 
     if isValid != False:
         print("The final validation error is ", validLoss[len(validLoss)-1])
-        #acc2 = calculateAccuracy(predic2, K)
-        #print("The percentage of the validation data belonging to each of K clusters is: ")
-        #printKNum(acc2)
+        acc2 = calculateAccuracy(predic2, K)
+        print("The percentage of the validation data belonging to each of K clusters is: ")
+        printKNum(acc2)
 
 
 
@@ -159,6 +166,7 @@ def stochastic_gradient_descent(epochs, alpha,K,D,trainData,ValidData=None,isVal
 
 
 def plotDataClusters(datapt,K,predic):
+    '''Plots the data into the predicted clusters'''
 
      colour = plt.cm.rainbow(np.linspace(0,1,K))
 
@@ -179,7 +187,7 @@ def plotDataClusters(datapt,K,predic):
 
 #Learning K-Means
 def mainPart1():
-
+'''Get the plots for clusters and losses'''
 #################  PART 1.1  ############################
     K=3
     learning_rate=0.1
@@ -203,7 +211,7 @@ def mainPart1():
 
 
     #################  PART 1.2   ############################
-    '''plt.close('all')
+    plt.close('all')
     #plot the data without labels(K=1)
 
 
@@ -249,10 +257,10 @@ def mainPart1():
     trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K5,D,data,ValidData=None)
     plotDataClusters(data,K5,predic)
     plt.title('Data classified to K=5')
-    plt.show()'''
+    plt.show()
 
     #################  PART 1.3   ############################
-    '''plt.close('all')
+    plt.close('all')
 
     vali_data, train_data=getVal(data)
 
@@ -318,13 +326,13 @@ def mainPart1():
     plt.ylabel('Valid Loss')
     plt.title('Validation Loss vs number of updates for different K')
     plt.legend()
-    plt.show()'''
+    plt.show()
 
 
 
 
 
-#mainPart1()
+mainPart1()
 
 
 def mainPart2():
@@ -350,29 +358,24 @@ def mainPart2():
 
 
     print("Total K=10")
-    #plt.figure(3)
+
     trainLoss1, validLoss1,predic=stochastic_gradient_descent(epochs, learning_rate,K2,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K2,predic)
-    #plt.title('Data classified to K=2')
+
 
 
     print("Total K=15")
-    #plt.figure(4)
+
     trainLoss2, validLoss2,predic=stochastic_gradient_descent(epochs, learning_rate,K3,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K3,predic)
-    #plt.title('Data classified to K=3')
+
 
     print("Total K=20")
-    #plt.figure(5)
-    trainLoss3, validLoss3,predic=stochastic_gradient_descent(epochs, learning_rate,K4,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K4,predic)
-    #plt.title('Data classified to K=4')
 
-    #plt.figure(6)
+    trainLoss3, validLoss3,predic=stochastic_gradient_descent(epochs, learning_rate,K4,D,train_data,ValidData=vali_data,isValid= True)
+
+
     print("Total K=30")
     trainLoss4, validLoss4,predic=stochastic_gradient_descent(epochs, learning_rate,K5,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K5,predic)
-    #plt.title('Data classified to K=5')
+
 
 
     X_test1 = np.linspace(0, len(validLoss), len(validLoss))
