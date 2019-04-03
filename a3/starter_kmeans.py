@@ -189,7 +189,7 @@ def mainPart1():
     '''Get the plots for clusters and losses'''
     #################  PART 1.1  ############################
     #parameters
-    K=3
+    '''K=3
     learning_rate=0.05
     epochs=200
     D=dim
@@ -257,7 +257,7 @@ def mainPart1():
     trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K5,D,data,ValidData=None)
     plotDataClusters(data,K5,predic)
     plt.title('Data classified to K=5')
-    plt.show()
+    plt.show()'''
 
     #################  PART 1.3   ############################
     plt.close('all')
@@ -271,7 +271,7 @@ def mainPart1():
     K4=4
     K5=5
     learning_rate=0.05
-    epochs=500
+    epochs=150
     D=dim
 
     #run the SGD for each K
@@ -411,8 +411,8 @@ def mainPart2():
     plt.plot(X_test5, trainLoss4, label="K=30")
 
     plt.xlabel('Number of Updates')
-    plt.ylabel('Test Loss')
-    plt.title('Test Loss vs number of updates for different K')
+    plt.ylabel('Train Loss')
+    plt.title('Train Loss vs number of updates for different K')
     plt.legend()
 
     plt.show()
@@ -420,4 +420,4 @@ def mainPart2():
 
 
 
-mainPart2()
+#mainPart2()
