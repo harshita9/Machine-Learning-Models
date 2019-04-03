@@ -189,6 +189,7 @@ def plotDataClusters(datapt,K,predic):
 def mainPart1():
 '''Get the plots for clusters and losses'''
 #################  PART 1.1  ############################
+    #parameters
     K=3
     learning_rate=0.1
     epochs=3000
@@ -215,7 +216,7 @@ def mainPart1():
     #plot the data without labels(K=1)
 
 
-
+    #parameters
     K1=1
     K2=2
     K3=3
@@ -261,10 +262,10 @@ def mainPart1():
 
     #################  PART 1.3   ############################
     plt.close('all')
-
+    #get the validation and training data
     vali_data, train_data=getVal(data)
 
-
+    #parameters
     K1=1
     K2=2
     K3=3
@@ -273,6 +274,8 @@ def mainPart1():
     learning_rate=0.1
     epochs=3500
     D=dim
+
+    #run the SGD for each K
 
     print("Total K=1")
     trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K1,D,train_data,ValidData=vali_data,isValid= True)
@@ -283,31 +286,24 @@ def mainPart1():
     plt.title('Training Data classified')
 
     print("Total K=2")
-    #plt.figure(3)
     trainLoss, validLoss1,predic=stochastic_gradient_descent(epochs, learning_rate,K2,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K2,predic)
-    #plt.title('Data classified to K=2')
+
 
 
     print("Total K=3")
-    #plt.figure(4)
     trainLoss, validLoss2,predic=stochastic_gradient_descent(epochs, learning_rate,K3,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K3,predic)
-    #plt.title('Data classified to K=3')
+
 
     print("Total K=4")
-    #plt.figure(5)
     trainLoss, validLoss3,predic=stochastic_gradient_descent(epochs, learning_rate,K4,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K4,predic)
-    #plt.title('Data classified to K=4')
 
-    #plt.figure(6)
+
+
     print("Total K=5")
     trainLoss, validLoss4,predic=stochastic_gradient_descent(epochs, learning_rate,K5,D,train_data,ValidData=vali_data,isValid= True)
-    #plotDataClusters(data,K5,predic)
-    #plt.title('Data classified to K=5')
 
 
+    #plot the losses
     X_test1 = np.linspace(0, len(validLoss), len(validLoss))
     X_test2 = np.linspace(0, len(validLoss1), len(validLoss1))
     X_test3 = np.linspace(0, len(validLoss2), len(validLoss2))
@@ -337,13 +333,13 @@ mainPart1()
 
 def mainPart2():
 
-    ''' Running 100D data for part 2'''
+    ''' Running 100D data for part 2 (Comment out line 8 before running)'''
 
     plt.close('all')
-
+    #get validation and training data and data is 100D
     vali_data, train_data=getVal(data)
 
-
+    #parameters
     K1=5
     K2=10
     K3=15
@@ -353,6 +349,7 @@ def mainPart2():
     epochs=3500
     D=dim
 
+    #run sgd for each K
     print("Total K=5")
     trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K1,D,train_data,ValidData=vali_data,isValid= True)
 
