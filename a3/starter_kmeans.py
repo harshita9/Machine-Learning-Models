@@ -345,7 +345,7 @@ def mainPart2():
     K4=20
     K5=30
     learning_rate=0.05
-    epochs=100
+    epochs=1000
     D=dim
 
     #run sgd for each K
