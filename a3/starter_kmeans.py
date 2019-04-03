@@ -62,7 +62,7 @@ def model_implementation(K,alpha,D):
 
 
 
-    adam_optimizer = tf.train.AdamOptimizer(learning_rate = alpha,beta1=0.9,beta2=0.99,epsilon=1e05, name="Adam").minimize(total_loss)
+    adam_optimizer = tf.train.AdamOptimizer(learning_rate = alpha,beta1=0.9,beta2=0.99,epsilon=1e-05, name="Adam").minimize(total_loss)
 
     return predicted, x, MU, total_loss, adam_optimizer,learning_rate
 
@@ -78,7 +78,7 @@ def calculateAccuracy(predic,K):
     for i in range (0,K):
 
         num=pr.count(i)
-        print(num)
+
         result.append(100*num/(float(N)))
 
     return result
@@ -168,31 +168,30 @@ def stochastic_gradient_descent(epochs, alpha,K,D,trainData,ValidData=None,isVal
 def plotDataClusters(datapt,K,predic):
     '''Plots the data into the predicted clusters'''
 
-     colour = plt.cm.rainbow(np.linspace(0,1,K))
+    colour = plt.cm.rainbow(np.linspace(0,1,K))
 
 
-     for i in range(K):
-         lbl="K = " + str(i+1)
-         idx=np.where(predic==i)
-         print(idx)
-         plt.scatter(datapt[idx,0],datapt[idx,1],c=colour[i],label=lbl)
+    for i in range(K):
+        lbl="K = " + str(i+1)
+        idx=np.where(predic==i)
+        plt.scatter(datapt[idx,0],datapt[idx,1],c=colour[i],label=lbl)
 
-     plt.xlabel('X1')
-     plt.ylabel('X2')
-     plt.legend()
+    plt.xlabel('X1')
+    plt.ylabel('X2')
+    plt.legend()
 
-     return
+    return
 
 
 
 #Learning K-Means
 def mainPart1():
-'''Get the plots for clusters and losses'''
-#################  PART 1.1  ############################
+    '''Get the plots for clusters and losses'''
+    #################  PART 1.1  ############################
     #parameters
     K=3
-    learning_rate=0.1
-    epochs=3000
+    learning_rate=0.05
+    epochs=200
     D=dim
     trainLoss, validLoss,predic=stochastic_gradient_descent(epochs, learning_rate,K,D,data,ValidData=None)
     plt.close('all')
@@ -222,8 +221,8 @@ def mainPart1():
     K3=3
     K4=4
     K5=5
-    learning_rate=0.1
-    epochs=6000
+    learning_rate=0.05
+    epochs=500
     D=dim
 
     print("Total K=1")
@@ -271,8 +270,8 @@ def mainPart1():
     K3=3
     K4=4
     K5=5
-    learning_rate=0.1
-    epochs=3500
+    learning_rate=0.05
+    epochs=500
     D=dim
 
     #run the SGD for each K
@@ -345,8 +344,8 @@ def mainPart2():
     K3=15
     K4=20
     K5=30
-    learning_rate=0.1
-    epochs=3500
+    learning_rate=0.05
+    epochs=100
     D=dim
 
     #run sgd for each K
